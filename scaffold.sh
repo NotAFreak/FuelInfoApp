@@ -1,0 +1,1 @@
+dotnet ef dbcontext scaffold "Data Source =/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/fuelDb.db" Microsoft.EntityFrameworkCore.Sqlite -o Models --force

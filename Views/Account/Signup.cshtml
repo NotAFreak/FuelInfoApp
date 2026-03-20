@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Signup";
+}
+<form asp-action="SignupPost" method="post">
+    <div class="row">
+        <div class="col-md-6">
+            @if (!string.IsNullOrEmpty((string?)TempData["Error"])) {
+                <div class="alert alert-dismissible alert-danger">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <strong>@TempData["Error"]</strong>
+                </div>
+            }
+            <div class="row">
+                <div class="w-100">
+                    <h1>Signup</h1>
+                    <hr/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Email:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="email" name="email"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Password:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="password" name="password"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    First Name:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" name="firstname"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Last Name:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" name="lastname"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Mobile Number:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="tel" name="lastname"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Postcode:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="number" name="lastname"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="float-end w-10">
+                    <button type="submit" class="btn btn-success float-end">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
