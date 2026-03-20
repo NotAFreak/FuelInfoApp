@@ -107,9 +107,6 @@ public partial class FuelDbContext : DbContext
             entity.ToTable("User");
 
             entity.Property(e => e.UserId).HasColumnName("UserID");
-            entity.Property(e => e.Role)
-                .HasDefaultValueSql("0")
-                .HasColumnType("INTEGER");
         });
 
         modelBuilder.Entity<UserPreference>(entity =>

@@ -40,7 +40,7 @@ public class AccountController : Controller {
 			new ("userid", user.UserId.ToString()),
 			new ("password", user.Password),
 			new (ClaimTypes.Email, user.Email),
-			new (ClaimTypes.Role, user.Role.ToString()),
+			new (ClaimTypes.Role, ((Role)user.Role).ToString()),
 		};
 
 		ClaimsIdentity claimIdentities = new (claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -23,7 +23,7 @@ public partial class User
 
     public int? Longitude { get; set; }
 
-    public string Role { get; set; } = null!;
+    public int Role { get; set; }
 
     public virtual ICollection<Car> Cars { get; set; } = new List<Car>();
 
