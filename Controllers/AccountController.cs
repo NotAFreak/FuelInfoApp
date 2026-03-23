@@ -95,12 +95,12 @@ public class AccountController : Controller {
 
 	[HttpPost]
 	[AllowAnonymous]
-	public async Task<IActionResult> LoginPost(string email, string password) {
-		if (string.IsNullOrEmpty(email.Trim())) {
+	public async Task<IActionResult> LoginPost(string? email, string? password) {
+		if (string.IsNullOrWhiteSpace(email)) {
 			TempData["Error"] = "Email required!";
 			return RedirectToAction("Login", "Account");	
 		}
-		if (string.IsNullOrEmpty(password.Trim())) {
+		if (string.IsNullOrWhiteSpace(password)) {
 			TempData["Error"] = "Password required!";
 			return RedirectToAction("Login", "Account");
 		}

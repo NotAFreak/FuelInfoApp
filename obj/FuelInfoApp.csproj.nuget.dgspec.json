@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj": {}
+    "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj": {}
   },
   "projects": {
-    "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj": {
+    "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
+        "projectUniqueName": "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj",
         "projectName": "FuelInfoApp",
-        "projectPath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
+        "projectPath": "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj",
         "packagesPath": "/home/notafreak/.nuget/packages/",
-        "outputPath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/obj/",
+        "outputPath": "/home/notafreak/Documents/GitHub/FuelInfoApp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/notafreak/.nuget/NuGet/NuGet.Config"
@@ -20,6 +20,7 @@
           "net10.0"
         ],
         "sources": {
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -84,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/notafreak/.dotnet/sdk/10.0.103/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.104/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
