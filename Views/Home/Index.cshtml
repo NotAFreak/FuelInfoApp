@@ -1,10 +1,24 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    Layout = "_Layout_Map";
 }
 
-<div id="map" style="height: 80vh; width: 100%;"></div>
+<div id="map" style="height: 90vh; width: 100%;"></div>
 @section Scripts {
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
     <script src="~/lib/leaflet/leaflet.js"></script>
     <script src="~/js/map.js"></script>
+    
+    <script>
+        var map = L.map('map', {
+            zoomControl: false
+        }).setView([51.505, -0.09], 13);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+    </script>
 }

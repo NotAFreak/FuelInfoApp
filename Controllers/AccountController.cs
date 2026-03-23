@@ -35,6 +35,15 @@ public class AccountController : Controller {
 		));
 		return hashed;
 	}
+	
+	[HttpPost]
+	public async Task<IActionResult> DeleteAccount() {
+		return RedirectToAction("Index", "Home");
+	}
+	[HttpPost]
+	public async Task<IActionResult> Logout() {
+		return RedirectToAction("Index", "Home");
+	}
 	public async Task AssignCookie(User user) {
 		List<Claim> claims = new () {
 			new ("userid", user.UserId.ToString()),
