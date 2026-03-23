@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9YHsSLq9sLs=",
+  "dgSpecHash": "DHaJ7GJbz6g=",
   "success": true,
-  "projectFilePath": "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj",
+  "projectFilePath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
   "expectedPackageFiles": [
     "/home/notafreak/.nuget/packages/castle.core/5.2.1/castle.core.5.2.1.nupkg.sha512",
     "/home/notafreak/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

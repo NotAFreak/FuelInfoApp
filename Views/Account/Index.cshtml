@@ -147,10 +147,10 @@
         
     </div>
     <div class="col-md-6">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#delete-account-modal">
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-account-modal">
             Delete Account
         </button>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#logout-modal">
+        <button type="button" class="btn btn-danger" asp-action="Logout" asp-controller="Account">
             Log Out
         </button>
     </div>
@@ -175,7 +175,7 @@
                 </div>
                 <div class="row mb-1">
                     <div class="col-md-6">
-                        <label class="form-label" for="new-modal-carRegistration">Registration</label>
+                        <label class="form-label" for="new-modal-carRegistration">Registration<small>(optional)</small></label>
                     </div>
                     <div class="col-md-6">
                         <input class="form-control"  id="new-modal-carRegistration" name="registration" type="text" 
@@ -228,7 +228,7 @@
                 </div>
                 <div class="row mb-1">
                     <div class="col-md-6">
-                        <label class="form-label" for="edit-car-modal-registration">Registration</label>
+                        <label class="form-label" for="edit-car-modal-registration">Registration<small>(optional)</small></label>
                     </div>
                     <div class="col-md-6">
                         <input class="form-control"  id="edit-car-modal-registration" name="registration" type="text" 
@@ -298,6 +298,29 @@
                 <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal">Close</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal fade" id="delete-account-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row ps-2">
+                    <h6>Are you sure you'd Like to delete your account?</h6>
+                </div>
+            </div>
+            <input name="carId" id="delete-car-modal-id" class="visually-hidden"/>
+            <div class="modal-footer">
+                <form asp-action="DeleteAccount" asp-controller="Account" method="post">
+                    <button type="submit" class="btn btn-danger float-start">Delete</button>
+                </form>
+                <button type="button" class="btn btn-primary float-end" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
 @section Scripts {

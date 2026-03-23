@@ -3319,11 +3319,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj",
+      "projectUniqueName": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
       "projectName": "FuelInfoApp",
-      "projectPath": "/home/notafreak/Documents/GitHub/FuelInfoApp/FuelInfoApp.csproj",
+      "projectPath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
       "packagesPath": "/home/notafreak/.nuget/packages/",
-      "outputPath": "/home/notafreak/Documents/GitHub/FuelInfoApp/obj/",
+      "outputPath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/notafreak/.nuget/NuGet/NuGet.Config"

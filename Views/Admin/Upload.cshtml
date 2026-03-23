@@ -1,4 +1,10 @@
 
 @{
-    
+    TempData["Title"] = "Upload";
 }
+<form method="post" enctype="multipart/form-data">
+    <label for="file" class="form-label">Upload CSV Data</label>
+    <input class="form-control" type="file" id="file">
+    
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
