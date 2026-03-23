@@ -107,6 +107,8 @@ public partial class FuelDbContext : DbContext
             entity.ToTable("User");
 
             entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Latitude).HasColumnType("NUMERIC");
+            entity.Property(e => e.Longitude).HasColumnType("NUMERIC");
         });
 
         modelBuilder.Entity<UserPreference>(entity =>

@@ -19,9 +19,9 @@ public partial class User
 
     public int? Postcode { get; set; }
 
-    public int? Latitude { get; set; }
+    public decimal? Latitude { get; set; }
 
-    public int? Longitude { get; set; }
+    public decimal? Longitude { get; set; }
 
     public int Role { get; set; }
 

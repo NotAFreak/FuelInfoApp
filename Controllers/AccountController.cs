@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace FuelInfoApp.Controllers;
-
 public enum Role : int {
 	User = 0,
 	Admin = 1
@@ -55,14 +55,28 @@ public class AccountController : Controller {
 	}
 	
 	[HttpGet]
-	[Authorize(Roles = "User")]
+	[Authorize]
 	public async Task<ActionResult> Index() {
-		return View(new ViewModel());
+		AccountViewModel vm = new();
+		Claim? idClaim = HttpContext.User.FindFirst("userid");
+		if (idClaim is null) {
+			return RedirectToAction("Login", "Account");
+		}
+		User? user = await db.Users
+			.Include(o => o.Cars)
+			.ThenInclude(o=>o.Fuel)
+			.FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+		if (user is null) {
+			return RedirectToAction("Signup", "Account");
+		}
+		vm.user = user;
+		vm.fuels = await db.Fuels.ToListAsync();
+		return View(vm);
 	}
 	[HttpGet]
 	[AllowAnonymous]
 	public async Task<IActionResult> Login() {
-		return View(new ViewModel());
+		return View();
 	}
 	[HttpGet]
 	[AllowAnonymous]
@@ -126,13 +140,167 @@ public class AccountController : Controller {
 			Postcode = postcode
 		};
 		db.Users.Add(newUser);
-		AssignCookie(newUser);
+		await AssignCookie(newUser);
 		await db.SaveChangesAsync();
 		return RedirectToAction("Index", "Home");
 	}
 	
-	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-	public IActionResult Error() {
-		return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+	public async Task<IActionResult> UpdateInfo(
+		string? email, string? password, string? firstname, string? lastname, 
+		string? mobile, int? postcode, double? latitude, double longitude
+		) {
+		
+		Claim? idClaim = HttpContext.User.FindFirst("userid");
+		Claim? passwordClaim = HttpContext.User.FindFirst("password");
+		if (idClaim is null || passwordClaim is null) {
+			TempData["Error"] = "Couldn't verify cookies!";
+			return RedirectToAction("Login", "Account");
+		}
+		
+		User? user = await db.Users .FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+		if (user is null) {
+			TempData["Error"] = "User does not exist!";
+			return RedirectToAction("Signup", "Account");
+		}
+		// The user is actually correct, now update the information we want to
+		if (email is not null) {
+			if (!Regex.IsMatch(email, "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+				TempData["Error"] = "Email not valid!";
+				return RedirectToAction("Index", "Account");
+			}
+
+			user.Email = email;
+		}
+
+		if (password is not null) {
+			if (password.Length < 6) {
+				TempData["Error"] = "Password needs to be 6 or more characters long!";
+				return RedirectToAction("Index", "Account");
+			}
+			user.Password = HashPassword(password);
+		}
+
+		if (firstname is not null) {
+			user.FirstName = firstname;
+		}
+
+		if (lastname is not null) {
+			user.LastName = lastname;
+		}
+
+		if (mobile is not null) {
+			user.MobileNumber = mobile;
+		}
+
+		if (latitude is not null) {
+			// user.Latitude = latitude;
+		}
+		
+		await AssignCookie(user);
+		
+		await db.SaveChangesAsync();
+		return RedirectToAction("Index", "Home");
 	}
+
+	[HttpPost]
+	public async Task<IActionResult> AddCar(string name, string? registration, int fuelId, float fuelConsumption) {
+		// Verify the user is the user
+		Claim? idClaim = HttpContext.User.FindFirst("userid");
+		Claim? passwordClaim = HttpContext.User.FindFirst("password");
+		if (idClaim is null || passwordClaim is null) {
+			TempData["Error"] = "Couldn't verify cookies!";
+			return RedirectToAction("Login", "Account");
+		}
+		User? user = await db.Users .FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+		if (user is null) {
+			TempData["Error"] = "User does not exist!";
+			return RedirectToAction("Signup", "Account");
+		}
+
+		if (string.IsNullOrEmpty(name)) {
+			TempData["Error"] = "Car name required!";
+			return RedirectToAction("Index", "Account");
+		}
+		
+		// Create and add the car
+		Car car = new() {
+			Name = name,
+			Registration = registration,
+			FuelConsumption = (decimal)fuelConsumption,
+			FuelId = fuelId,
+			UserId = user.UserId
+		};
+		await db.Cars.AddAsync(car);
+		await db.SaveChangesAsync();
+		return RedirectToAction("Index", "Account");
+	}
+	[HttpPost]
+	public async Task<IActionResult> EditCar(int carId, string name, string? registration, int fuelId, float 
+		fuelConsumption) {
+		// Verify the user is the user
+		Claim? idClaim = HttpContext.User.FindFirst("userid");
+		Claim? passwordClaim = HttpContext.User.FindFirst("password");
+		if (idClaim is null || passwordClaim is null) {
+			TempData["Error"] = "Couldn't verify cookies!";
+			return RedirectToAction("Login", "Account");
+		}
+		User? user = await db.Users .FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+		if (user is null) {
+			TempData["Error"] = "User does not exist!";
+			return RedirectToAction("Signup", "Account");
+		}
+
+		if (string.IsNullOrEmpty(name)) {
+			TempData["Error"] = "Car name required!";
+			return RedirectToAction("Index", "Account");
+		}
+		
+		// Get and edit the car
+		Car? car = await db.Cars.FirstOrDefaultAsync(o => o.CarId == carId);
+		if (car is null) {
+			TempData["Error"] = "Car does not exist!";
+			return RedirectToAction("Index", "Account");
+		}
+		if (car.UserId != user.UserId) {
+			TempData["Error"] = "Car not owned by user!";
+			return RedirectToAction("Index", "Account");
+		}
+
+		car.Name = name;
+		car.Registration = registration;
+		car.FuelId = fuelId;
+		car.FuelConsumption = (decimal)fuelConsumption;
+		await db.SaveChangesAsync();
+		return RedirectToAction("Index", "Account");
+	}
+	[HttpPost]
+	public async Task<IActionResult> DeleteCar(int carId) {
+		// Verify the user is the user
+		Claim? idClaim = HttpContext.User.FindFirst("userid");
+		Claim? passwordClaim = HttpContext.User.FindFirst("password");
+		if (idClaim is null || passwordClaim is null) {
+			TempData["Error"] = "Couldn't verify cookies!";
+			return RedirectToAction("Login", "Account");
+		}
+		User? user = await db.Users .FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+		if (user is null) {
+			TempData["Error"] = "User does not exist!";
+			return RedirectToAction("Signup", "Account");
+		}
+
+		Car? car = await db.Cars.FirstOrDefaultAsync(o=>o.CarId == carId);
+		if (car is null) {
+			TempData["Error"] = "Car does not exist!";
+			return RedirectToAction("Index", "Account");
+		}
+
+		if (car.UserId != user.UserId) {
+			TempData["Error"] = "Car not owned by user!";
+			return RedirectToAction("Index", "Account");
+		}
+
+		db.Cars.Remove(car);
+		await db.SaveChangesAsync();
+		return RedirectToAction("Index", "Account");
+	} 
 }

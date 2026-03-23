@@ -1,16 +1,316 @@
+@model FuelInfoApp.ViewModels.AccountViewModel
 @{
     ViewData["Title"] = "Account";
 }
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
+<div class="row">
+    <h1>Account</h1>
+    <hr/>
+    <div class="col-md-6">
+        <h2>Cars</h2>
+        <hr/>
+        <table id="cars-table" class="display table table-hover table-responsive">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Registration</th>
+                <th>Fuel</th>
+                <th>Fuel Consumption L/km</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Car car in Model.user.Cars) {
+                <tr>
+                    <td>
+                        <button type="submit" class="btn btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#edit-car-modal" onclick="SetEditCarModal('@car.CarId', '@car.Name', '@car.Registration', '@car.FuelId', '@car.FuelConsumption')" id="carId" value="@car.CarId">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                    </td>
+                    <td>
+                        @car.Name
+                    </td>
+                    <td>
+                        @car.Registration
+                    </td>
+                    <td>
+                        @car.Fuel.FuelName
+                    </td>
+                    <td>
+                        @car.FuelConsumption
+                    </td>
+                    <td>
+                        @if (string.IsNullOrEmpty(car.Registration)) {
+                            <button type="submit" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#delete-car-modal" onclick="SetDeleteCarModal('@car.CarId', '@car.Name')" id="carId" value="@car.CarId">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        }
+                        else {
+                            <button type="submit" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#delete-car-modal" onclick="SetDeleteCarModalReg('@car.CarId','@car.Name', '@car.Registration')" id="carId" value="@car.CarId">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-car-modal">
+            Add Car
+        </button>
+    </div>
+    <div class="col-md-6">
+        <form class="row" method="post" asp-action="UpdateInfo" asp-controller="Account">
+            <div class="row">
+                <div class="w-100">
+                    <h2>User Details</h2>
+                    <hr/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Email:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="email" name="email" value="@Model.user.Email"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Password:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="password" name="password"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    First Name <small>(Optional)</small>:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" name="firstname" value="@Model.user.FirstName"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Last Name <small>(Optional)</small>:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" name="lastname" value="@Model.user.LastName"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Mobile Number <small>(Optional)</small>:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="tel" name="mobile" value="@Model.user.MobileNumber"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Postcode <small>(Optional)</small>:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="number" name="postcode" value="@Model.user.Postcode"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Latitude <small>(Optional)</small>:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="number" name="latitude" value="@Model.user.Latitude"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    Longitude <small>(Optional)</small>:
+                </div>
+                <div class="col-sm-6">
+                    <input class="form-control" type="number" name="longitude" value="@Model.user.Longitude"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="float-end w-10">
+                    <button type="submit" class="btn btn-success float-end">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
-</body>
-</html>
+
+<!-- Modals -->
+<div class="modal fade" id="new-car-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" method="post" asp-action="AddCar" asp-controller="Account">
+            <div class="modal-header">
+                <h5 class="modal-title">Add new car</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="new-modal-carName">Car Name</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="form-control" id="new-modal-carName" name="name" type="text" placeholder="Name"/>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="new-modal-carRegistration">Registration</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="form-control"  id="new-modal-carRegistration" name="registration" type="text" 
+                               placeholder="Registration"/>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="modal_fuel">Fuel Type</label>
+                    </div>
+                    <div class="col-md-6">
+                        <select id="modal_fuel" name="fuelId" class="form-select">
+                            @foreach (Fuel f in Model.fuels) {
+                                <option value="@f.FuelId">@f.FuelName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="modal_fuelConsumption">Fuel Consumption (Litre/km)</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input id="modal_fuelConsumption" name="fuelConsumption" min="1" step="any" class="form-control" value="1.0"/>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary float-start">Add Car</button>
+                <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="edit-car-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" method="post" asp-action="EditCar" asp-controller="Account">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Car</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="edit-car-modal-carName">Car Name</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="form-control" id="edit-car-modal-carName" name="name" type="text" placeholder="Name"/>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="edit-car-modal-registration">Registration</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="form-control"  id="edit-car-modal-registration" name="registration" type="text" 
+                               placeholder="Registration"/>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="edit-car-modal-fuel">Fuel Type</label>
+                    </div>
+                    <div class="col-md-6">
+                        <select id="edit-car-modal-fuel" name="fuelId" class="form-select">
+                            @foreach (Fuel f in Model.fuels) {
+                                <option id="edit-car-modal-fuel_@f.FuelId" value="@f.FuelId">@f.FuelName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <label class="form-label" for="modal_fuelConsumption">Fuel Consumption (Litre/km)</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input id="edit-car-modal-fuelConsumption" name="fuelConsumption" min="1" step="any" class="form-control" value="1.0"/>
+                    </div>
+                </div>
+            </div>
+            <input name="carId" id="edit-car-modal-id" class="visually-hidden"/>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary float-start">Save</button>
+                <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="delete-car-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" method="post" asp-action="DeleteCar" asp-controller="Account">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Car</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row ps-2">
+                    <h6>Are you sure you'd Like to delete this car?</h6>
+                </div>
+                <div class="row ps-2">
+                    <div class="col-md-6">
+                        <label>Car Name:</label>
+                    </div>
+                    <div class="col-md-6">
+                        <text id="delete-car-modal-name-label">IF THIS TEXT IS VISIBLE, SOMETHING WENT WRONG</text>
+                    </div>
+                </div>
+                <div class="row ps-2">
+                    <div class="col-md-6">
+                        <label>Registration: </label>
+                    </div>
+                    <div class="col-md-6">
+                        <label id="delete-car-modal-reg-label">No registration</label>
+                    </div>
+                </div>
+            </div>
+            <input name="carId" id="delete-car-modal-id" class="visually-hidden"/>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger float-start">Delete</button>
+                <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <link href="~/lib/datatables/datatables.min.css" rel="stylesheet">
+    <script src="~/lib/datatables/datatables.min.js"></script>
+    
+    <script>
+        function SetDeleteCarModal(carId, carName) {
+            document.getElementById("delete-car-modal-id").setAttribute("value", carId);
+            document.getElementById("delete-car-modal-name-label").textContent = carName;
+        }
+        function SetDeleteCarModalReg(carId, carName, carReg) {
+            document.getElementById("delete-car-modal-id").setAttribute("value", carId);
+            document.getElementById("delete-car-modal-name-label").textContent = carName;
+            document.getElementById("delete-car-modal-reg-label").textContent = carReg;
+        }
+        
+        function SetEditCarModal(carId, carName, carReg, carFuel, carFuelConsumption) {
+            document.getElementById("edit-car-modal-id").setAttribute("value", carId);
+            
+            document.getElementById("edit-car-modal-carName").setAttribute("value", carName);
+            document.getElementById("edit-car-modal-registration").setAttribute("value", carReg);
+            // document.getElementById("edit-car-modal-fuel").setAttribute("value", carFuel);
+            document.getElementById("edit-car-modal-fuelConsumption").setAttribute("value", carFuelConsumption);
+            document.getElementById("edit-car-modal-fuel_" + carFuel).setAttribute("selected", true);
+        }
+        var carsTable = new DataTable('#cars-table');
+    </script>
+}
