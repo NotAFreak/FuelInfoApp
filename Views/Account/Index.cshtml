@@ -307,9 +307,11 @@
             
             document.getElementById("edit-car-modal-carName").setAttribute("value", carName);
             document.getElementById("edit-car-modal-registration").setAttribute("value", carReg);
-            // document.getElementById("edit-car-modal-fuel").setAttribute("value", carFuel);
-            document.getElementById("edit-car-modal-fuelConsumption").setAttribute("value", carFuelConsumption);
+            @foreach (Fuel f in Model.fuels) {
+                @:document.getElementById("edit-car-modal-fuel_" + @f.FuelId).removeAttribute("selected");
+            }
             document.getElementById("edit-car-modal-fuel_" + carFuel).setAttribute("selected", true);
+            document.getElementById("edit-car-modal-fuelConsumption").setAttribute("value", carFuelConsumption);
         }
         var carsTable = new DataTable('#cars-table');
     </script>
