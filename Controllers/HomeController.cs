@@ -32,7 +32,13 @@ public class HomeController : Controller {
         ).ToListAsync();
         
         if (stations.Count > maxViewableStations) {
-            // stations.
+            vm.points.Add(new Marker() {
+                latitude = (double)stations.Average(o=>o.Latitude),
+                longitude = (double)stations.Average(o=>o.Longitude),
+                stationCount = stations.Count
+            });
+        } else {
+            vm.stations = stations;
         }
         return Json(vm);
     }

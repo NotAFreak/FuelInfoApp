@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LayqPhC9pcM=",
+  "dgSpecHash": "DHaJ7GJbz6g=",
   "success": true,
   "projectFilePath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
   "expectedPackageFiles": [
@@ -50,15 +50,5 @@
     "/home/notafreak/.nuget/packages/system.security.permissions/9.0.0/system.security.permissions.9.0.0.nupkg.sha512",
     "/home/notafreak/.nuget/packages/system.windows.extensions/9.0.0/system.windows.extensions.9.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
-      "projectPath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
-      "warningLevel": 1,
-      "filePath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }
