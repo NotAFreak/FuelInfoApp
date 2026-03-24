@@ -1,10 +1,10 @@
-
+@model FuelInfoApp.ViewModels.AdminUploadViewModel;
 @{
     TempData["Title"] = "Upload";
 }
-<form method="post" enctype="multipart/form-data">
-    <label for="file" class="form-label">Upload CSV Data</label>
-    <input class="form-control" type="file" id="file">
+<form method="post" enctype="multipart/form-data" asp-action="UploadPost" asp-controller="Admin">
+    <label for="fileUpload" class="form-label">Upload CSV Data</label>
+    <input class="form-control" type="file" id="fileUpload" name="UploadFile" asp-for="UploadFile">
     
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>

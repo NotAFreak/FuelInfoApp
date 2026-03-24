@@ -15,7 +15,7 @@ public partial class Car
 
     public int FuelId { get; set; }
 
-    public decimal FuelConsumption { get; set; }
+    public double FuelConsumption { get; set; }
 
     public virtual Fuel Fuel { get; set; } = null!;
 

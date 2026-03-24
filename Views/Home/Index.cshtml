@@ -1,4 +1,5 @@
-﻿@{
+﻿@model FuelInfoApp.ViewModels.MapViewModel
+@{
     ViewData["Title"] = "Home Page";
     Layout = "_Layout_Map";
 }
@@ -12,7 +13,7 @@
     <script>
         var map = L.map('map', {
             zoomControl: false
-        }).setView([51.505, -0.09], 13);
+        }).setView([-27.45004, 151.95113], 13);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -20,5 +21,21 @@
         L.control.zoom({
             position: 'bottomright'
         }).addTo(map);
+        map.on('zoomend', function() {
+            
+        });
+        map.on('dragend', function() {
+            const center = map.getBounds().getCenter();
+            const zoom = map.getZoom();
+            $.ajax({
+                complete: UpdateMapPosition,
+                url: "/Home/UpdateMap?lat=" + center.lat + "%lon" + center.lng,
+                dataType: "json"
+            });
+        });
+        
+        function UpdateMapPosition(data) {
+            console.log("got ajax reply back");
+        }
     </script>
 }

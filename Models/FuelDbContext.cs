@@ -48,7 +48,7 @@ public partial class FuelDbContext : DbContext
 
             entity.Property(e => e.CarId).HasColumnName("CarID");
             entity.Property(e => e.FuelConsumption)
-                .HasDefaultValueSql("1")
+                .HasDefaultValue(1.0)
                 .HasColumnType("NUMERIC");
             entity.Property(e => e.FuelId).HasColumnName("FuelID");
             entity.Property(e => e.UserId).HasColumnName("UserID");

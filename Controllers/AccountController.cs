@@ -140,11 +140,11 @@ public class AccountController : Controller {
 	[HttpPost]
 	[AllowAnonymous]
 	public async Task<IActionResult> SignupPost(string email, string password, string firstname, string lastname, string mobile, int postcode) {
-		if (string.IsNullOrEmpty(email.Trim())) {
+		if (string.IsNullOrWhiteSpace(email.Trim())) {
 			TempData["Error"] = "Email required!";
 			return RedirectToAction("Signup", "Account");
 		}
-		if (string.IsNullOrEmpty(password.Trim())) {
+		if (string.IsNullOrWhiteSpace(password)) {
 			TempData["Error"] = "Password required!";
 			return RedirectToAction("Signup", "Account");
 		}
@@ -256,7 +256,7 @@ public class AccountController : Controller {
 		Car car = new() {
 			Name = name,
 			Registration = registration,
-			FuelConsumption = (decimal)fuelConsumption,
+			FuelConsumption = fuelConsumption,
 			FuelId = fuelId,
 			UserId = user.UserId
 		};
@@ -299,7 +299,7 @@ public class AccountController : Controller {
 		car.Name = name;
 		car.Registration = registration;
 		car.FuelId = fuelId;
-		car.FuelConsumption = (decimal)fuelConsumption;
+		car.FuelConsumption = fuelConsumption;
 		await db.SaveChangesAsync();
 		return RedirectToAction("Index", "Account");
 	}

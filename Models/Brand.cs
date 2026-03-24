@@ -7,7 +7,7 @@ public partial class Brand
 {
     public int BrandId { get; set; }
 
-    public int BrandName { get; set; }
+    public string BrandName { get; set; } = null!;
 
     public virtual ICollection<Station> Stations { get; set; } = new List<Station>();
 }
