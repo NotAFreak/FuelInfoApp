@@ -1,9 +1,15 @@
+using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using FuelInfoApp.Models;
 using FuelInfoApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace FuelInfoApp.Controllers;
 
@@ -24,17 +30,27 @@ public class HomeController : Controller {
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UpdateMap(double minLatitude, double maxLatitude, double minLongitude, double maxLongitude, int zoom) {
+    public async Task<IActionResult> UpdateMap(double minLat, double maxLat, double minLon, double maxLon, int z) {
         MapViewModel vm = new();
         List<Station> stations = await db.Stations.Where( o => 
-            o.Latitude > (decimal)minLatitude && o.Latitude < (decimal)maxLatitude &&
-            o.Longitude > (decimal)minLongitude && o.Longitude < (decimal)maxLongitude
+            o.Latitude > (decimal)minLat && o.Latitude < (decimal)maxLat &&
+            o.Longitude > (decimal)minLon && o.Longitude < (decimal)maxLon
         ).ToListAsync();
         
         if (stations.Count > maxViewableStations) {
-            // stations.
+            Marker m = new() {
+                latitude = (double)stations.Average(o=>o.Latitude),
+                longitude = (double)stations.Average(o=>o.Longitude),
+                stationCount = stations.Count
+            };
+            vm.markers.Add(m);
         }
-        return Json(vm);
+        else {
+            vm.stations = stations;
+        }
+        //Newton
+        string jt = JsonConvert.SerializeObject(vm);
+        return Json(jt);
     }
     [AllowAnonymous]
     public async Task<IActionResult> Privacy() {

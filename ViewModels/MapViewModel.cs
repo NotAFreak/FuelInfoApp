@@ -1,13 +1,24 @@
+using System.Text.Json.Serialization;
 using FuelInfoApp.Models;
+using Newtonsoft.Json;
 
 namespace FuelInfoApp.ViewModels;
 
-public class Point {
-	double latitude;
-	double longitude;
-	int stationCount = 0;
+[Serializable]
+[JsonObject(MemberSerialization.OptOut)]
+public class Marker {
+	[JsonProperty]
+	public double latitude;
+	[JsonProperty]
+	public double longitude;
+	[JsonProperty]
+	public int stationCount = 0;
 }
+[Serializable]
+[JsonObject(MemberSerialization.OptOut)]
 public class MapViewModel : ViewModel {
-	public List<Point> points = new();
+	[JsonProperty]
+	public List<Marker> markers = new();
+	[JsonProperty]
 	public List<Station> stations = new();
 }

@@ -21,21 +21,51 @@
         L.control.zoom({
             position: 'bottomright'
         }).addTo(map);
-        map.on('zoomend', function() {
-            
-        });
-        map.on('dragend', function() {
-            const center = map.getBounds().getCenter();
+        map.on('zoomend', GetNewMapData);
+        map.on('dragend', GetNewMapData);
+        
+        function GetNewMapData() {
+            const topLeft = map.getBounds().getNorthWest();
+            const bottomRight = map.getBounds().getSouthEast()
             const zoom = map.getZoom();
             $.ajax({
-                complete: UpdateMapPosition,
-                url: "/Home/UpdateMap?lat=" + center.lat + "%lon" + center.lng,
-                dataType: "json"
+                url: "/Home/UpdateMap",
+                data: {
+                    minLat: bottomRight.lat,
+                    maxLat: topLeft.lat,
+                    minLon: topLeft.lng,
+                    maxLon: bottomRight.lng,
+                    z: zoom
+                },
+                dataType: "json",
+                success: UpdateMapPosition
             });
-        });
+        }
+
+        var groupLayer = L.layerGroup().addTo(map);
+        var stationLayer = L.layerGroup().addTo(map);
         
-        function UpdateMapPosition(data) {
-            console.log("got ajax reply back");
+        function UpdateMapPosition(data, status) {
+            var d = JSON.parse(data);
+            groupLayer.clearLayers();
+            for(let i = 0; i < d.markers.length; i++) {
+                let m = d.markers[i];
+                let lat = m.latitude;
+                let lon = m.longitude;
+                L.marker([lat, lon], {
+                    
+                }).addTo(groupLayer);
+            }
+            stationLayer.clearLayers();
+            for(let i = 0; i < d.stations.length; i++) {
+                let s = d.stations[i];
+                let lat = s.Latitude;
+                let lon = s.Longitude;
+                L.marker([lat, lon], {
+                    
+                }).addTo(stationLayer);
+            }
+            console.log('updated map');
         }
     </script>
 }
