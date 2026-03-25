@@ -6,7 +6,7 @@ namespace FuelInfoApp.ViewModels;
 
 [Serializable]
 [JsonObject(MemberSerialization.OptOut)]
-public class Marker {
+public class StationGroup {
 	[JsonProperty]
 	public double latitude;
 	[JsonProperty]
@@ -18,7 +18,7 @@ public class Marker {
 [JsonObject(MemberSerialization.OptOut)]
 public class MapViewModel : ViewModel {
 	[JsonProperty]
-	public List<Marker> markers = new();
+	public List<StationGroup> markers = new();
 	[JsonProperty]
 	public List<Station> stations = new();
 }

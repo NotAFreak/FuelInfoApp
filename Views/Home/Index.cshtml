@@ -4,26 +4,43 @@
     Layout = "_Layout_Map";
 }
 
-<div id="map" style="height: 90vh; width: 100%;"></div>
+<div id="map" class="map-view"></div>
+<div class="row">
+    <div class="col-md-2">
+        Left panel
+    </div>
+    <div class="col-md-10">
+        <div class="row">
+            Tpo row
+        </div>
+        <div class="row">
+            bototm row
+        </div>
+    </div>
+</div>
 @section Scripts {
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
     <script src="~/lib/leaflet/leaflet.js"></script>
     <script src="~/js/map.js"></script>
     
     <script>
+        // Create map
         var map = L.map('map', {
             zoomControl: false
         }).setView([-27.45004, 151.95113], 13);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-
         L.control.zoom({
             position: 'bottomright'
         }).addTo(map);
+        
+        // Subscribe functions
         map.on('zoomend', GetNewMapData);
         map.on('dragend', GetNewMapData);
+        $(document).ready(GetNewMapData);
         
+        // Define functions
         function GetNewMapData() {
             const topLeft = map.getBounds().getNorthWest();
             const bottomRight = map.getBounds().getSouthEast()
@@ -53,7 +70,9 @@
                 let lat = m.latitude;
                 let lon = m.longitude;
                 L.marker([lat, lon], {
-                    
+                    icon: L.divIcon({
+                        html: '<span class="badge bg-primary rounded">' + m.stationCount + '</span>'
+                    })
                 }).addTo(groupLayer);
             }
             stationLayer.clearLayers();
@@ -62,7 +81,12 @@
                 let lat = s.Latitude;
                 let lon = s.Longitude;
                 L.marker([lat, lon], {
-                    
+                    icon: L.divIcon({
+                        html: 
+                            '<button class="btn btn-primary">' +
+                                '<img width="32px" height="32px" src="/img/fuel.png"/>' +
+                            '</button>'
+                    })
                 }).addTo(stationLayer);
             }
             console.log('updated map');

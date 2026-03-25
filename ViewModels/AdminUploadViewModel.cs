@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using FuelInfoApp.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,9 @@ namespace FuelInfoApp.ViewModels;
 public class AdminUploadViewModel : ViewModel {
 	public IFormFile? UploadFile { get; set; }
 
+	DateTime TimeFromDataset(string input) {
+		return DateTime.Parse(input, CultureInfo.GetCultureInfo("en-AU"));
+	}
 	public async Task UploadData(FuelDbContext db, string filePath) {
 		// 63533 records
 		string[] records = await File.ReadAllLinesAsync(filePath);
@@ -17,7 +21,6 @@ public class AdminUploadViewModel : ViewModel {
 			// Regex for splitting .csv data
 			string[] record = Regex.Split(row, ",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
 
-			string SiteId = record[0].Trim('"');
 			string Site_Name = record[1];
 			string Site_Brand = record[2];
 			string Sites_Address_Line_1 = record[3];
@@ -28,7 +31,7 @@ public class AdminUploadViewModel : ViewModel {
 			double Site_Longitude = Convert.ToDouble(record[8]);
 			string Fuel_Type = record[9].Trim();
 			uint Price = Convert.ToUInt32(record[10]);
-			string TransactionDateutc = record[11].Trim();
+			DateTime TransactionDateutc = TimeFromDataset(record[11].Trim());
 			
 			// Check if fuel already exists in db. If not, add it.
 			Fuel? fuel = await db.Fuels.FirstOrDefaultAsync(o=>o.FuelName == Fuel_Type);
@@ -64,12 +67,24 @@ public class AdminUploadViewModel : ViewModel {
 				};
 				await db.Stations.AddAsync(station);
 			}
-			progress++;
+
+			StationFuelChange? change = await db.StationFuelChanges
+				.Where(o => o.StationId == station.StationId)
+				.Where(o => o.FuelId == fuel.FuelId)
+				.FirstOrDefaultAsync();
 			
-			/*StationFuelChange? change = db.StationFuelChanges
-				.Where(o=>o.StationId == station.StationId)
-				.Where(o=>o.FuelId )
-				*/
+			if (change is null) {
+				change = new() {
+					FuelId = fuel.FuelId,
+					ChangeTime = BitConverter.GetBytes(TransactionDateutc.Ticks),
+					Price = (int)Price,
+					IsAvailable = (Price == 9999) ? 1 : 0,
+					StationId = station.StationId
+				};
+				await db.StationFuelChanges.AddAsync(change);
+			}
+
+			progress++;
 		}
 		await db.SaveChangesAsync();
 	}

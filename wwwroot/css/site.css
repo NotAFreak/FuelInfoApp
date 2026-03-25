@@ -1,6 +1,16 @@
 html {
   font-size: 14px;
 }
+.map-view {
+  position: fixed;
+  top: 0px;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+.navbar {
+  z-index: 1;
+}
 
 @media (min-width: 768px) {
   html {
