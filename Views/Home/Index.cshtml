@@ -5,15 +5,15 @@
 }
 
 <div id="map" class="map-view"></div>
-<div class="row">
-    <div class="col-md-2">
+<div class="row above-map">
+    <div class="col-md-2 above-map">
         Left panel
     </div>
-    <div class="col-md-10">
-        <div class="row">
+    <div class="col-md-10 above-map">
+        <div class="row above-map">
             Tpo row
         </div>
-        <div class="row">
+        <div class="row above-map">
             bototm row
         </div>
     </div>
@@ -71,7 +71,8 @@
                 let lon = m.longitude;
                 L.marker([lat, lon], {
                     icon: L.divIcon({
-                        html: '<span class="badge bg-primary rounded">' + m.stationCount + '</span>'
+                        className: 'custom-leaflet-icon',
+                        html: '<span class="badge bg-secondary text-center marker marker-group d-flex align-items-center justify-content-center">' + m.stationCount + '</span>'
                     })
                 }).addTo(groupLayer);
             }
@@ -82,9 +83,10 @@
                 let lon = s.Longitude;
                 L.marker([lat, lon], {
                     icon: L.divIcon({
+                        className: 'custom-leaflet-icon',
                         html: 
-                            '<button class="btn btn-primary">' +
-                                '<img width="32px" height="32px" src="/img/fuel.png"/>' +
+                            '<button class="btn btn-primary marker">' +
+                                '<img width="100%" height="100%" src="/img/fuel-light.png"/>' +
                             '</button>'
                     })
                 }).addTo(stationLayer);

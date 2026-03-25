@@ -1,10 +1,5 @@
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Numerics;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using FuelInfoApp.Models;
 using FuelInfoApp.ViewModels;
@@ -26,50 +21,44 @@ public class HomeController : Controller {
     [AllowAnonymous]
     public async Task<IActionResult> Index() {
         MapViewModel vm = new();
-        //vm.stations = await db.Stations
-        //    .Include(o => o.Brand).ToListAsync();
         return View(vm);
     }
     
-    // Note this is squared
-    public float dist(decimal latA, decimal lonA, decimal latB, decimal lonB) {
-        Vector2 a = new((float)latA, (float)lonA);
-        Vector2 b = new((float)latB, (float)lonB);
-        return Vector2.DistanceSquared(a, b);
-    }
-
+    // Requested through AJAX
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UpdateMap(double minLat, double maxLat, double minLon, double maxLon, int z) {
+    public async Task<IActionResult> UpdateMap(decimal minLat, decimal maxLat, decimal minLon, decimal maxLon, int z) {
         MapViewModel vm = new();
         List<Station> stations = await db.Stations.Where( o => 
             o.Latitude > (decimal)minLat && o.Latitude < (decimal)maxLat &&
             o.Longitude > (decimal)minLon && o.Longitude < (decimal)maxLon
         ).ToListAsync();
         
-        // Make a 5x5 grid based on the viewport. Seperate each station into segments of the grid
-        // List<Station>[,] grid = new List<Station>[gridSize,gridSize];
+        // Divide the viewport into an X*X grid of cells, group based on those cells, and
+        // the quantity of stations in each cell
         List<StationGroup> markers = new();
-        double latSegment = (maxLat - minLat) / gridSize;
-        double lonSegment = (maxLon - minLon) / gridSize;
+        decimal latSegment = (maxLat - minLat) / gridSize;
+        decimal lonSegment = (maxLon - minLon) / gridSize;
         for (int x = 0; x < gridSize; x++) {
             for (int y = 0; y < gridSize; y++) {
-                decimal minLa = (decimal)(minLat + (latSegment*x));
-                decimal maxLa = (decimal)(maxLat - (latSegment*x));
-                decimal minLo = (decimal)(minLon + (lonSegment*y));
-                decimal maxLo = (decimal)(maxLon - (lonSegment*y));
-                
-                // Get every station just in the cell
+                // Cell-specific coordinates
+                decimal latStart = (minLat + (latSegment * x));
+                decimal latEnd = (latStart + latSegment);
+                decimal lonStart = (minLon + (lonSegment * y));
+                decimal lonEnd = (lonStart + lonSegment);
+
                 List<Station> s = stations.Where(o =>
-                    o.Latitude > minLa && o.Latitude < maxLa &&
-                    o.Longitude > minLo && o.Longitude < maxLo
+                    o.Latitude >= latStart && o.Latitude < latEnd &&
+                    o.Longitude >= lonStart && o.Longitude < lonEnd
                 ).ToList();
+                
                 // If there are too many stations in that cell, group them
-                if (s.Count > maxViewableStations) {
+                int sCount = s.Count;
+                if (sCount > maxViewableStations) {
                     StationGroup m = new() {
                         latitude = (double)s.Average(o => o.Latitude),
                         longitude = (double)s.Average(o => o.Longitude),
-                        stationCount = s.Count
+                        stationCount = sCount
                     };
                     markers.Add(m);
                 } else {

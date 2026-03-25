@@ -8,6 +8,26 @@ html {
   height: 100vh;
   z-index: 0;
 }
+.custom-leaflet-icon {
+  background: none;
+  border: none;
+}
+.marker {
+  width: 45px;
+  height: 45px;
+  transform: translate(-50%, -50%);
+  padding: 5px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: default;
+  filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+}
+.marker-group {
+  border-radius: 50px;
+}
+.above-map {
+  z-index: 1;
+}
 .navbar {
   z-index: 1;
 }
