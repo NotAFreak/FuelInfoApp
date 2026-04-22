@@ -10,8 +10,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FuelInfoApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/sidebar.css" asp-append-version="true"/>
 </head>
-<body>
+<body class="d-flex flex-column overflow-hidden vh-100">
     <header class="mb-0 above-map">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-0">
             <div class="container-fluid">
@@ -52,7 +53,7 @@
             </div>
         </nav>
     </header>
-    <main role="main" class="p-0 m-0 ps-3">
+    <main role="main" class="p-0 m-0 h-100">
         @RenderBody()
     </main>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

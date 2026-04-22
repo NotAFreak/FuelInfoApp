@@ -54,13 +54,16 @@
   ],
   "logs": [
     {
-      "code": "NU1900",
+      "code": "NU1903",
       "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
+      "message": "Package 'Newtonsoft.Json' 10.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr",
       "projectPath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
       "warningLevel": 1,
       "filePath": "/home/notafreak/Documents/School/Digital Solutions/IA2/FuelInfoApp/FuelInfoApp.csproj",
-      "targetGraphs": []
+      "libraryId": "Newtonsoft.Json",
+      "targetGraphs": [
+        "net10.0"
+      ]
     }
   ]
 }

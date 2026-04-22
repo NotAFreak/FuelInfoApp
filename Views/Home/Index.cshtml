@@ -3,57 +3,58 @@
     ViewData["Title"] = "Home Page";
     Layout = "_Layout_Map";
 }
-
-<div class="d-flex">
-    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-2">
+<div class="d-flex h-100">
+    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <form onsubmit="SearchStations(); return false;">
-            <div class="d-flex mb-2">
-                <input id="srch_StationName" class="form-control me-sm-2" type="search" placeholder="Station name (optional)">
-                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-6">
-                    <input id="srch_Latitude" class="form-control" type="number" step="any" placeholder="Latitude (optional)"/>
+        <div class="hide-on-collapse m-1">
+            <form onsubmit="SearchStations(); return false;">
+                <div class="row d-flex m-1">
+                    <button class="btn btn-primary mb-2" type="submit">Search</button>
+                    <input id="srch_StationName" class="form-control mb-2" type="search" placeholder="Station name (optional)">
                 </div>
-                <div class="col-md-6">
-                    <input id="srch_Longitude" class="form-control" type="number" step="any" placeholder="Longitude (optional)"/>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <input id="srch_Latitude" class="form-control" type="number" step="any" placeholder="Latitude (optional)"/>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <input id="srch_Longitude" class="form-control" type="number" step="any" placeholder="Longitude (optional)"/>
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-6">
-                    @if (User.Identity is not null && User.Identity.IsAuthenticated) {
-                        <select id="srch_CarId" class="form-select" onchange="SetSearchFuelFromCar(this.value)">
-                            <option value="-1">None</option>
-                            @foreach (Car car in Model.cars) {
-                                <option value="@car.CarId">@(car.Name + (!string.IsNullOrEmpty(car.Registration) ? " (" + car.Registration + ")" : ""))</option>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        @if (User.Identity is not null && User.Identity.IsAuthenticated) {
+                            <select id="srch_CarId" class="form-select" onchange="SetSearchFuelFromCar(this.value)">
+                                <option value="-1">None</option>
+                                @foreach (Car car in Model.cars) {
+                                    <option value="@car.CarId">@(car.Name + (!string.IsNullOrEmpty(car.Registration) ? " (" + car.Registration + ")" : ""))</option>
+                                }
+                            </select>
+                        }
+                        else {
+                            <label>Sign in for cars</label>
+                        }
+
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <select id="srch_FuelId" class="form-select">
+                            @foreach (Fuel f in Model.fuels) {
+                                <option value="@f.FuelId">@f.FuelName</option>
                             }
                         </select>
-                    }
-                    else {
-                        <label>Sign in for cars</label>
-                    }
-
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <select id="srch_FuelId" class="form-select">
-                        @foreach (Fuel f in Model.fuels) {
-                            <option value="@f.FuelId">@f.FuelName</option>
-                        }
-                    </select>
-                </div>
-            </div>
-        </form>
-        <hr/>
-        <div id="stations_Container">
+            </form>
+            <hr/>
+        </div>
+        <div id="top-shadow"></div>
+        <div id="stations_Container" class=" mr-1 overflow-scroll bottom-0 hide-on-collapse">
 
         </div>
     </div>
-    <div class="main-content">
-        <div id="map" class="map-view"></div>
-    </div>
+    <div id="map" class="map-view h-100 flex-grow-1"></div>
+
 </div>
 @section Scripts {
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
@@ -188,7 +189,7 @@
                     let s = d.stations[i];
                     let div = document.createElement('div');
                     div.innerHTML = `
-                    <divs class="card mb-2">
+                    <divs class="card m-1 mb-2">
                         <div class="card-header">
                             <label>` + s.Name + `</label>
                             <button class="float-end btn btn-info bi bi-chevron-right"/>
