@@ -28,6 +28,10 @@ html {
 .above-map {
   z-index: 1;
 }
+.floating-panel {
+  filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+  background-color: #ffffff;
+}
 .navbar {
   z-index: 1;
 }

@@ -1,21 +1,58 @@
-﻿@model FuelInfoApp.ViewModels.MapViewModel
+﻿@model FuelInfoApp.ViewModels.HomeViewModel
 @{
     ViewData["Title"] = "Home Page";
     Layout = "_Layout_Map";
 }
 
-<div id="map" class="map-view"></div>
-<div class="row above-map">
-    <div class="col-md-2 above-map">
-        Left panel
+<div class="d-flex">
+    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-2">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <form onsubmit="SearchStations(); return false;">
+            <div class="d-flex mb-2">
+                <input id="srch_StationName" class="form-control me-sm-2" type="search" placeholder="Station name (optional)">
+                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <input id="srch_Latitude" class="form-control" type="number" step="any" placeholder="Latitude (optional)"/>
+                </div>
+                <div class="col-md-6">
+                    <input id="srch_Longitude" class="form-control" type="number" step="any" placeholder="Longitude (optional)"/>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    @if (User.Identity is not null && User.Identity.IsAuthenticated) {
+                        <select id="srch_CarId" class="form-select" onchange="SetSearchFuelFromCar(this.value)">
+                            <option value="-1">None</option>
+                            @foreach (Car car in Model.cars) {
+                                <option value="@car.CarId">@(car.Name + (!string.IsNullOrEmpty(car.Registration) ? " (" + car.Registration + ")" : ""))</option>
+                            }
+                        </select>
+                    }
+                    else {
+                        <label>Sign in for cars</label>
+                    }
+
+                </div>
+                <div class="col-md-6">
+                    <select id="srch_FuelId" class="form-select">
+                        @foreach (Fuel f in Model.fuels) {
+                            <option value="@f.FuelId">@f.FuelName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </form>
+        <hr/>
+        <div id="stations_Container">
+
+        </div>
     </div>
-    <div class="col-md-10 above-map">
-        <div class="row above-map">
-            Tpo row
-        </div>
-        <div class="row above-map">
-            bototm row
-        </div>
+    <div class="main-content">
+        <div id="map" class="map-view"></div>
     </div>
 </div>
 @section Scripts {
@@ -41,6 +78,11 @@
         $(document).ready(GetNewMapData);
         
         // Define functions
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+        
         function GetNewMapData() {
             const topLeft = map.getBounds().getNorthWest();
             const bottomRight = map.getBounds().getSouthEast()
@@ -63,7 +105,7 @@
         var stationLayer = L.layerGroup().addTo(map);
         
         function UpdateMapPosition(data, status) {
-            var d = JSON.parse(data);
+            let d = JSON.parse(data);
             groupLayer.clearLayers();
             for(let i = 0; i < d.markers.length; i++) {
                 let m = d.markers[i];
@@ -86,12 +128,85 @@
                         className: 'custom-leaflet-icon',
                         html: 
                             '<button class="btn btn-primary marker">' +
-                                '<img width="100%" height="100%" src="/img/fuel-light.png"/>' +
+                                '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
                             '</button>'
                     })
                 }).addTo(stationLayer);
             }
             console.log('updated map');
+        }
+        function SetSearchFuelFromCar(carId) {
+            document.getElementById("srch_FuelId").value = carId;
+        }
+        function SearchStations() {
+            let stationName = document.getElementById("srch_StationName").value;
+            if(stationName === "") {
+                stationName = null;
+            }
+            let latitude = document.getElementById("srch_Latitude").value;
+            if(latitude === "") {
+                latitude = null;
+            }
+            let longitude = document.getElementById("srch_Longitude").value;
+            if(longitude === "") {
+                longitude = null;
+            }
+            let carId = document.getElementById("srch_CarId").value;
+            if(carId === "") {
+                carId = null;
+            }
+            let fuelId = document.getElementById("srch_FuelId").value;
+            if(fuelId === "") {
+                fuelId = null;
+            }
+            $.ajax({
+                url: "/Home/SearchStations",
+                data: {
+                    stationName: stationName,
+                    latitude: latitude,
+                    longitude: longitude,
+                    carId: carId,
+                    fuelId: fuelId,
+                    page: 0
+                },
+                dataType: "json",
+                success: DisplaySearchedStations
+            });
+        }
+        function DisplaySearchedStations(data, status) {
+            let d = JSON.parse(data);
+            const container = document.getElementById("stations_Container");
+            container.textContent = ''; // clear
+            if(d.stations.length == 0) {
+                let div = document.createElement('div');
+                div.innerHTML = `
+                    <small class="text-center"> No available fuel stations available!</small>
+                `;
+                container.appendChild(div);
+            } else {
+                for(let i = 0; i < d.stations.length; i++) {
+                    let s = d.stations[i];
+                    let div = document.createElement('div');
+                    div.innerHTML = `
+                    <divs class="card mb-2">
+                        <div class="card-header">
+                            <label>` + s.Name + `</label>
+                            <button class="float-end btn btn-info bi bi-chevron-right"/>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <label>Brand: </label>
+                                <label>` + s.Brand.Name + `</label>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <small>`+ s.Address + ' ' + s.Suburb + ' ' + s.State + ' ' + s.Postcode +`</small> 
+                        </div>
+                    </div>
+                `;
+                    container.appendChild(div);
+                }   
+            }
         }
     </script>
 }

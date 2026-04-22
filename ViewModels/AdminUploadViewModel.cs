@@ -66,6 +66,7 @@ public class AdminUploadViewModel : ViewModel {
 					BrandId = brand.BrandId
 				};
 				await db.Stations.AddAsync(station);
+				await db.SaveChangesAsync();
 			}
 
 			StationFuelChange? change = await db.StationFuelChanges
@@ -76,12 +77,13 @@ public class AdminUploadViewModel : ViewModel {
 			if (change is null) {
 				change = new() {
 					FuelId = fuel.FuelId,
-					ChangeTime = BitConverter.GetBytes(TransactionDateutc.Ticks),
+					ChangeTime = BitConverter.GetBytes(TransactionDateutc.ToBinary()),
 					Price = (int)Price,
-					IsAvailable = (Price == 9999) ? 1 : 0,
+					IsAvailable = ((int)Price) == 9999 ? 1 : 0,
 					StationId = station.StationId
 				};
 				await db.StationFuelChanges.AddAsync(change);
+				await db.SaveChangesAsync();
 			}
 
 			progress++;

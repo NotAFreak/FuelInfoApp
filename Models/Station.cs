@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace FuelInfoApp.Models;
 
@@ -24,7 +22,7 @@ public partial class Station {
     public string State { get; set; } = null!;
     [JsonProperty]
     public int? Postcode { get; set; }
-    [JsonIgnore]
+    [JsonProperty]
     public virtual Brand Brand { get; set; } = null!;
     [JsonIgnore]
     public virtual ICollection<StationFuelChange> StationFuelChanges { get; set; } = new List<StationFuelChange>();
