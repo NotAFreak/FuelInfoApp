@@ -4,7 +4,8 @@
     Layout = "_Layout_Map";
 }
 <div class="d-flex h-100">
-    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel">
+    <!--Left Sidebar-->
+    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel collapsed">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-chevron-left"></i>
         </button>
@@ -47,13 +48,24 @@
                 </div>
             </form>
             <hr/>
+            <div id="search_Spinner" class="align-self-center spinner-border spinner-border-sm" role="status" style=" visibility: hidden"> </div>
         </div>
         <div id="top-shadow"></div>
         <div id="stations_Container" class=" mr-1 overflow-scroll bottom-0 hide-on-collapse">
 
         </div>
     </div>
-    <div id="map" class="map-view h-100 flex-grow-1"></div>
+    <!--Right sidebar-->
+    <div class="sidebar-right d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel collapsed">
+        <button class="toggle-btn-right" onclick="toggleSidebarRight()">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <div class="hide-on-collapse m-1">
+            text
+        </div>
+    </div>
+    <!--Map-->
+    <div id="map" class="map-view main-content h-100 flex-grow-1 collapsed"></div>
 
 </div>
 @section Scripts {
@@ -83,11 +95,17 @@
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('collapsed');
         }
+        function toggleSidebarRight() {
+            const sidebarRight = document.querySelector('.sidebar-right');
+            sidebarRight.classList.toggle('collapsed');
+            document.querySelector("#map").classList.toggle("collapsed");
+        }
         
         function GetNewMapData() {
             const topLeft = map.getBounds().getNorthWest();
             const bottomRight = map.getBounds().getSouthEast()
             const zoom = map.getZoom();
+            
             $.ajax({
                 url: "/Home/UpdateMap",
                 data: {
@@ -122,13 +140,13 @@
             stationLayer.clearLayers();
             for(let i = 0; i < d.stations.length; i++) {
                 let s = d.stations[i];
-                let lat = s.Latitude;
+                let lat = s.Latitude
                 let lon = s.Longitude;
                 L.marker([lat, lon], {
                     icon: L.divIcon({
                         className: 'custom-leaflet-icon',
                         html: 
-                            '<button class="btn btn-primary marker">' +
+                            '<button id="btn_station_' + s.StationId + '" class="btn btn-primary marker">' +
                                 '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
                             '</button>'
                     })
@@ -160,6 +178,7 @@
             if(fuelId === "") {
                 fuelId = null;
             }
+            document.getElementById("search_Spinner").style.visibility = "visible";
             $.ajax({
                 url: "/Home/SearchStations",
                 data: {
@@ -178,6 +197,7 @@
             let d = JSON.parse(data);
             const container = document.getElementById("stations_Container");
             container.textContent = ''; // clear
+            document.getElementById("search_Spinner").style.visibility = "hidden";
             if(d.stations.length == 0) {
                 let div = document.createElement('div');
                 div.innerHTML = `
@@ -192,7 +212,7 @@
                     <divs class="card m-1 mb-2">
                         <div class="card-header">
                             <label>` + s.Name + `</label>
-                            <button class="float-end btn btn-info bi bi-chevron-right"/>
+                            <button class="float-end btn btn-info bi bi-chevron-right" onclick="ViewStationFromId(` + s.StationId + `)"/>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -208,6 +228,40 @@
                     container.appendChild(div);
                 }   
             }
+        }
+        function ViewStationFromId(stationId) {
+            $.ajax({
+                url: "/Home/GetStation",
+                data: {
+                    stationId: stationId 
+                },
+                dataType: "json",
+                success: ViewStation
+            });
+        }
+        function ViewStation(data, status) {
+            let station = JSON.parse(data);
+            let latitude = station.Latitude;
+            let longitude = station.Longitude;
+            
+            // Go to position
+            map.setView([latitude, longitude], 15);
+            
+            // create marker if it doesnt exist
+            GetNewMapData();
+            let marker = document.getElementById("btn_station_" + station.StationId);
+            if(marker === null) {
+                L.marker([latitude, longitude], {
+                    icon: L.divIcon({
+                        className: 'custom-leaflet-icon',
+                        html:
+                            '<button id="btn_station_' + station.StationId + '" class="btn btn-primary marker">' +
+                            '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
+                            '</button>'
+                    })
+                }).addTo(stationLayer);
+            }
+            marker.focus();
         }
     </script>
 }

@@ -130,6 +130,12 @@ public class HomeController : Controller {
         }
         return Json(JsonConvert.SerializeObject(vm));
     }
+    
+    [AllowAnonymous]
+    public async Task<IActionResult> GetStation(int stationId) {
+        Station? station = await db.Stations.FirstOrDefaultAsync(o=>o.StationId == stationId);
+        return Json(JsonConvert.SerializeObject(station));
+    }
     [AllowAnonymous]
     public async Task<IActionResult> Privacy() {
         return View();

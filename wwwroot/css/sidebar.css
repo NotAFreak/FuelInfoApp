@@ -54,18 +54,15 @@ body {
 
 .profile-section {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
+} 
 
 .main-content {
-    margin-left: var(--sidebar-width);
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    padding: 20px;
+    margin-right: var(--sidebar-right-width);
     transition: all 0.3s ease;
 }
 
-.collapsed~.main-content {
-    margin-left: var(--sidebar-width-collapsed);
+.main-content.collapsed {
+    margin-right: var(--sidebar-right-width-collapsed);
 }
 
 .toggle-btn {
