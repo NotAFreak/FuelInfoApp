@@ -5,7 +5,7 @@
 }
 <div class="d-flex h-100">
     <!--Left Sidebar-->
-    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel collapsed">
+    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel-left collapsed">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-chevron-left"></i>
         </button>
@@ -55,13 +55,32 @@
 
         </div>
     </div>
-    <!--Right sidebar-->
-    <div class="sidebar-right d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel collapsed">
-        <button class="toggle-btn-right" onclick="toggleSidebarRight()">
-            <i class="bi bi-chevron-right"></i>
+    <!--Right sidebar - Station view-->
+    <div class="sidebar-right d-flex flex-column flex-shrink-0 position-fixed p-2 h-100 above-map floating-panel-right collapsed">
+        <button class="toggle-btn-right hide-on-collapse" onclick="disableSidebarRight()">
+            <i class="bi bi-x-lg"></i>
         </button>
-        <div class="hide-on-collapse m-1">
-            text
+        <div id="stationView_Content" class="hide-on-collapse m-3">
+            <div class="card">
+                <h4 id="txt_StationView_Name" class="card-header text-center">STATION NAME</h4>
+                <div class="card-body">
+                    <h5 id="txt_StationView_BrandName" class="card-title">BRAND NAME</h5>
+                    <hr/>
+                    <h6>Fuel Availability</h6>
+                </div>
+                <div class="card-body">
+                    <hr/>
+                    <h6>Fuel Prices</h6>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <label id="lab_StationView_Address">ADDRESS</label>
+                        <label id="lab_StationView_Suburb">SURBURB</label>
+                        <label id="lab_StationView_State">STATE</label>
+                        <label id="lab_StationView_Postcode">POSTCODE</label>
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
     <!--Map-->
@@ -99,6 +118,16 @@
             const sidebarRight = document.querySelector('.sidebar-right');
             sidebarRight.classList.toggle('collapsed');
             document.querySelector("#map").classList.toggle("collapsed");
+        }
+        function enableSidebarRight() {
+            const sidebarRight = document.querySelector('.sidebar-right');
+            sidebarRight.classList.remove('collapsed');
+            document.querySelector("#map").classList.remove("collapsed");
+        }
+        function disableSidebarRight() {
+            const sidebarRight = document.querySelector('.sidebar-right');
+            sidebarRight.classList.add('collapsed');
+            document.querySelector("#map").classList.add("collapsed");
         }
         
         function GetNewMapData() {
@@ -146,7 +175,7 @@
                     icon: L.divIcon({
                         className: 'custom-leaflet-icon',
                         html: 
-                            '<button id="btn_station_' + s.StationId + '" class="btn btn-primary marker">' +
+                            '<button id="btn_station_' + s.StationId + '" class="btn btn-primary marker" onclick="ViewStationFromId(' + s.StationId + ')">' +
                                 '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
                             '</button>'
                     })
@@ -256,12 +285,31 @@
                         className: 'custom-leaflet-icon',
                         html:
                             '<button id="btn_station_' + station.StationId + '" class="btn btn-primary marker">' +
-                            '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
+                                '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
                             '</button>'
                     })
                 }).addTo(stationLayer);
+                marker = document.getElementById("btn_station_" + station.StationId);
             }
-            marker.focus();
+            
+            // TODO: FOCUS MARKER
+            marker.classList.add("active");
+            
+            // Open sidepanel
+            enableSidebarRight();
+            const txt_StationView_Name = document.getElementById('txt_StationView_Name');
+            const txt_StationView_BrandName = document.getElementById('txt_StationView_BrandName');
+            const lab_StationView_Address = document.getElementById('lab_StationView_Address');
+            const lab_StationView_Postcode = document.getElementById('lab_StationView_Postcode');
+            const lab_StationView_Suburb = document.getElementById('lab_StationView_Suburb');
+            const lab_StationView_State = document.getElementById('lab_StationView_State');
+            
+            txt_StationView_Name.textContent = station.Name;
+            txt_StationView_BrandName.textContent = station.Brand.BrandName;
+            lab_StationView_Address.textContent = station.Address;
+            lab_StationView_Postcode.textContent = station.Postcode;
+            lab_StationView_Suburb.textContent = station.Suburb;
+            lab_StationView_State.textContent = station.State;
         }
     </script>
 }

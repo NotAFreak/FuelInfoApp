@@ -1,6 +1,6 @@
 :root {
     --sidebar-right-width: 300px;
-    --sidebar-right-width-collapsed: 00px;
+    --sidebar-right-width-collapsed: 0px;
 }
 
 body {
@@ -8,7 +8,7 @@ body {
 }
 
 .sidebar-right {
-    width: var(--sidebar-right-width);
+    width: min(var(--sidebar-right-width), 100vw);
     right: 0px;
     margin: 0px;
     height: 100%;
@@ -17,6 +17,7 @@ body {
 
 .sidebar-right.collapsed {
     width: var(--sidebar-right-width-collapsed);
+    padding: 0px !important;
 }
 
 .sidebar-right-link {
