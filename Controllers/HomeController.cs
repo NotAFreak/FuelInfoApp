@@ -46,25 +46,25 @@ public class HomeController : Controller {
     // Requested through AJAX only
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UpdateMap(decimal minLat, decimal maxLat, decimal minLon, decimal maxLon, int z) {
+    public async Task<IActionResult> UpdateMap(double minLat, double maxLat, double minLon, double maxLon, int z) {
         MapViewModel vm = new();
         List<Station> stations = await db.Stations.Where( o => 
-            o.Latitude > (decimal)minLat && o.Latitude < (decimal)maxLat &&
-            o.Longitude > (decimal)minLon && o.Longitude < (decimal)maxLon
+            o.Latitude > (double)minLat && o.Latitude < (double)maxLat &&
+            o.Longitude > (double)minLon && o.Longitude < (double)maxLon
         ).ToListAsync();
         
         // Divide the viewport into an X*X grid of cells, group based on those cells, and
         // the quantity of stations in each cell
         List<StationGroup> markers = new();
-        decimal latSegment = (maxLat - minLat) / gridSize;
-        decimal lonSegment = (maxLon - minLon) / gridSize;
+        double latSegment = (maxLat - minLat) / gridSize;
+        double lonSegment = (maxLon - minLon) / gridSize;
         for (int x = 0; x < gridSize; x++) {
             for (int y = 0; y < gridSize; y++) {
                 // Cell-specific coordinates
-                decimal latStart = minLat + (latSegment * x);
-                decimal latEnd = latStart + latSegment;
-                decimal lonStart = minLon + (lonSegment * y);
-                decimal lonEnd = lonStart + lonSegment;
+                double latStart = minLat + (latSegment * x);
+                double latEnd = latStart + latSegment;
+                double lonStart = minLon + (lonSegment * y);
+                double lonEnd = lonStart + lonSegment;
 
                 List<Station> s = stations.Where(o =>
                     o.Latitude >= latStart && o.Latitude < latEnd &&
@@ -99,22 +99,31 @@ public class HomeController : Controller {
         HomeSearchViewModel vm = new();
         if (stationName is null) {
             vm.stations = await db.Stations
-                .Include(o=>o.StationFuelChanges)
+                .Include(o=>o.StationFuelStates)
+                .ThenInclude(o=>o.StationFuelStateFuels)
                 .ToListAsync();
         } else {
             vm.stations = await db.Stations
-                .Include(o=>o.StationFuelChanges)
+                .Include(o=>o.StationFuelStates)
+                .ThenInclude(o=>o.StationFuelStateFuels)
                 .Where(o => o.Name.ToLower().Contains(stationName.ToLower()))
                 .ToListAsync();
         }
 
         if (fuelId is not null) {
             foreach (Station s in vm.stations.ToList()) {
-                s.StationFuelChanges = s.StationFuelChanges
-                    .OrderBy(o => DateTime.FromBinary(BitConverter.ToInt64(o.ChangeTime)))
-                    .ToList();
-                StationFuelChange? change = s.StationFuelChanges.FirstOrDefault(o => o.FuelId == fuelId);
-                if (change is null || change.IsAvailable == 0) {
+                StationFuelState? latestState = s.StationFuelStates
+                    .OrderBy(o => Common.GetChangeTime(o))
+                    .FirstOrDefault();
+                if (latestState is null) {
+                    vm.stations.Remove(s);
+                    continue;
+                }
+
+                StationFuelStateFuel? stateFuel = latestState.StationFuelStateFuels
+                    .FirstOrDefault(o => o.FuelId == fuelId);
+                
+                if (stateFuel is null || stateFuel.IsAvailable == 0) {
                     vm.stations.Remove(s);
                 }
             }
@@ -123,8 +132,8 @@ public class HomeController : Controller {
         if (latitude is not null && longitude is not null) {
             vm.stations = vm.stations
                 .OrderBy(o => 
-                    Common.LatitudeDistance(o.Latitude, (decimal)latitude) + 
-                    Common.LongitudeDistance(o.Longitude, (decimal)longitude)
+                    Common.LatitudeDistance(o.Latitude, (double)latitude) + 
+                    Common.LongitudeDistance(o.Longitude, (double)longitude)
                 )
                 .ToList();
         }

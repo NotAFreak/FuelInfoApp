@@ -23,7 +23,9 @@ public partial class FuelDbContext : DbContext
 
     public virtual DbSet<Station> Stations { get; set; }
 
-    public virtual DbSet<StationFuelChange> StationFuelChanges { get; set; }
+    public virtual DbSet<StationFuelState> StationFuelStates { get; set; }
+
+    public virtual DbSet<StationFuelStateFuel> StationFuelStateFuels { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -40,6 +42,9 @@ public partial class FuelDbContext : DbContext
             entity.ToTable("Brand");
 
             entity.Property(e => e.BrandId).HasColumnName("BrandID");
+            entity.Property(e => e.BrandImageUrl)
+                .HasDefaultValueSql("null")
+                .HasColumnName("BrandImageURL");
         });
 
         modelBuilder.Entity<Car>(entity =>
@@ -83,22 +88,34 @@ public partial class FuelDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
-        modelBuilder.Entity<StationFuelChange>(entity =>
+        modelBuilder.Entity<StationFuelState>(entity =>
         {
-            entity.HasKey(e => new { e.StationId, e.FuelId });
+            entity.HasKey(e => e.StateId);
 
-            entity.ToTable("StationFuelChange");
+            entity.ToTable("StationFuelState");
 
+            entity.Property(e => e.StateId).HasColumnName("StateID");
             entity.Property(e => e.StationId).HasColumnName("StationID");
+
+            entity.HasOne(d => d.Station).WithMany(p => p.StationFuelStates)
+                .HasForeignKey(d => d.StationId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<StationFuelStateFuel>(entity =>
+        {
+            entity.HasKey(e => new { e.StateId, e.FuelId });
+
+            entity.Property(e => e.StateId).HasColumnName("StateID");
             entity.Property(e => e.FuelId).HasColumnName("FuelID");
             entity.Property(e => e.IsAvailable).HasDefaultValue(1);
 
-            entity.HasOne(d => d.Fuel).WithMany(p => p.StationFuelChanges)
+            entity.HasOne(d => d.Fuel).WithMany(p => p.StationFuelStateFuels)
                 .HasForeignKey(d => d.FuelId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.Station).WithMany(p => p.StationFuelChanges)
-                .HasForeignKey(d => d.StationId)
+            entity.HasOne(d => d.State).WithMany(p => p.StationFuelStateFuels)
+                .HasForeignKey(d => d.StateId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
