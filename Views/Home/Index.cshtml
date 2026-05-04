@@ -149,8 +149,8 @@
             });
         }
 
-        const groupLayer = L.layerGroup().addTo(map);
-        const stationLayer = L.layerGroup().addTo(map);
+        var groupLayer = L.layerGroup().addTo(map);
+        var stationLayer = L.layerGroup().addTo(map);
         
         function UpdateMapPosition(data, status) {
             let d = JSON.parse(data);

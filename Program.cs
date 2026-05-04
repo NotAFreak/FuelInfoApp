@@ -1,16 +1,14 @@
 using FuelInfoApp.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
-namespace FuelInfoApp;
-
 public static class Program {
     public static void Main(string[] args) {
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
-        string connectionString = builder.Configuration.GetConnectionString("FuelInfoContextConnection") ?? throw new 
+        var connectionString = builder.Configuration.GetConnectionString("FuelInfoContextConnection") ?? throw new 
             InvalidOperationException("Connection string 'FuelInfoContextConnection' not found.");
         builder.Services.AddDbContext<FuelDbContext>(options => options.UseLazyLoadingProxies()
             .UseSqlite(connectionString));

@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace FuelInfoApp.Models;
 
-[JsonObject(MemberSerialization.OptOut)]
-public partial class Brand
-{
+[JsonObject(MemberSerialization.OptIn)]
+public partial class Brand {
+    [JsonProperty]
     public int BrandId { get; set; }
-
+    [JsonProperty]
     public string BrandName { get; set; } = null!;
-
-    public string? BrandImageUrl { get; set; }
-    
     [JsonIgnore]
     public virtual ICollection<Station> Stations { get; set; } = new List<Station>();
 }

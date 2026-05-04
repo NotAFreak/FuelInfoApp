@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace FuelInfoApp.Models;
 
-[JsonObject(MemberSerialization.OptOut)]
-public partial class StationFuelStateFuel
+public partial class StationFuelChange
 {
-    public int StateId { get; set; }
+    public int StationId { get; set; }
 
     public int FuelId { get; set; }
+
+    public byte[] ChangeTime { get; set; } = null!;
 
     public int Price { get; set; }
 
@@ -17,6 +17,5 @@ public partial class StationFuelStateFuel
 
     public virtual Fuel Fuel { get; set; } = null!;
 
-    [JsonIgnore]
-    public virtual StationFuelState State { get; set; } = null!;
+    public virtual Station Station { get; set; } = null!;
 }
