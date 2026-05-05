@@ -3,7 +3,7 @@
     ViewData["Title"] = "Home Page";
     Layout = "_Layout_Map";
 }
-<div class="d-flex h-100">
+<div class="d-flex h-100" xmlns="http://www.w3.org/1999/html">
     <!--Left Sidebar-->
     <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel-left collapsed">
         <button class="toggle-btn" onclick="toggleSidebar()">
@@ -71,6 +71,7 @@
                 <div class="card-body">
                     <hr/>
                     <h6>Fuel Prices</h6>
+                    <canvas id="fuelPriceChart"></canvas>
                 </div>
                 <div class="card-footer text-muted">
                     <small>
@@ -109,6 +110,51 @@
         map.on('dragend', GetNewMapData);
         $(document).ready(GetNewMapData);
         
+        // Create fuel price chart
+        const chartCtx = document.getElementById("fuelPriceChart");
+        let fuelChart = new Chart(chartCtx, {
+                type: 'line',
+                options: {
+                    responsive: true,
+                        plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            // Luxon format string
+                            tooltipFormat: 'DD T'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Price {$AUD}'
+                        },
+                        ticks: {
+                            callback: function (value, index, values) {
+                                return "$" + value.toLocaleString("en-AU", {
+                                    style: "currency",
+                                    currency: "AUD",
+                                    minimumFractionDigits:0,
+                                    maximumFractionDigits:2});
+                            }
+                        }
+                    }
+                },
+            }
+        );
         // Define functions
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -270,6 +316,17 @@
         }
         function ViewStation(data, status) {
             let station = JSON.parse(data);
+            $.ajax({
+                url: "/Home/GetGraph",
+                data: {
+                    stationId: station.StationId,
+                    fuelId: document.getElementById("srch_FuelId").value,
+                    duration: 0
+                },
+                dataType: "json",
+                success: DisplayFuelChart
+            });
+            
             let latitude = station.Latitude;
             let longitude = station.Longitude;
             
@@ -310,6 +367,30 @@
             lab_StationView_Postcode.textContent = station.Postcode;
             lab_StationView_Suburb.textContent = station.Suburb;
             lab_StationView_State.textContent = station.State;
+        }
+        function DisplayFuelChart(data, status) {
+            let graphData = JSON.parse(data);
+            var datasets = [graphData.prices.length];
+            for(var x = 0; x < graphData.prices.length; x++) {
+                let fuelData = graphData.prices[x];
+                var dataset = [fuelData.length];
+                for(var y = 0; y < fuelData.length; y++) {
+                    dataset[y] = {
+                        x: new Date(fuelData[y].changeTime),
+                        y: fuelData[y].fuelPrice / 1000
+                    };
+                }
+                datasets[x] = {
+                    label: graphData.fuels[x],
+                    data: dataset
+                }
+            }
+            
+            const chartData = {
+                datasets: datasets
+            }
+            fuelChart.data = chartData;
+            fuelChart.update();
         }
     </script>
 }

@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc;
 using FuelInfoApp.Models;
 using FuelInfoApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.CompilerServices;
 using Newtonsoft.Json;
 
 namespace FuelInfoApp.Controllers;
@@ -46,25 +48,25 @@ public class HomeController : Controller {
     // Requested through AJAX only
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UpdateMap(decimal minLat, decimal maxLat, decimal minLon, decimal maxLon, int z) {
+    public async Task<IActionResult> UpdateMap(double minLat, double maxLat, double minLon, double maxLon, int z) {
         MapViewModel vm = new();
         List<Station> stations = await db.Stations.Where( o => 
-            o.Latitude > (decimal)minLat && o.Latitude < (decimal)maxLat &&
-            o.Longitude > (decimal)minLon && o.Longitude < (decimal)maxLon
+            o.Latitude > minLat && o.Latitude < maxLat &&
+            o.Longitude > minLon && o.Longitude < maxLon
         ).ToListAsync();
         
         // Divide the viewport into an X*X grid of cells, group based on those cells, and
         // the quantity of stations in each cell
         List<StationGroup> markers = new();
-        decimal latSegment = (maxLat - minLat) / gridSize;
-        decimal lonSegment = (maxLon - minLon) / gridSize;
+        double latSegment = (maxLat - minLat) / gridSize;
+        double lonSegment = (maxLon - minLon) / gridSize;
         for (int x = 0; x < gridSize; x++) {
             for (int y = 0; y < gridSize; y++) {
                 // Cell-specific coordinates
-                decimal latStart = minLat + (latSegment * x);
-                decimal latEnd = latStart + latSegment;
-                decimal lonStart = minLon + (lonSegment * y);
-                decimal lonEnd = lonStart + lonSegment;
+                double latStart = minLat + (latSegment * x);
+                double latEnd = latStart + latSegment;
+                double lonStart = minLon + (lonSegment * y);
+                double lonEnd = lonStart + lonSegment;
 
                 List<Station> s = stations.Where(o =>
                     o.Latitude >= latStart && o.Latitude < latEnd &&
@@ -95,7 +97,7 @@ public class HomeController : Controller {
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> SearchStations(string? stationName, decimal? latitude, decimal? longitude, int? carId, int? fuelId, int page = 0) {
+    public async Task<IActionResult> SearchStations(string? stationName, double? latitude, double? longitude, int? carId, int? fuelId, int page = 0) {
         HomeSearchViewModel vm = new();
         if (stationName is null) {
             vm.stations = await db.Stations
@@ -123,12 +125,38 @@ public class HomeController : Controller {
         if (latitude is not null && longitude is not null) {
             vm.stations = vm.stations
                 .OrderBy(o => 
-                    Common.LatitudeDistance(o.Latitude, (decimal)latitude) + 
-                    Common.LongitudeDistance(o.Longitude, (decimal)longitude)
+                    Common.LatitudeDistance(o.Latitude, (double)latitude) + 
+                    Common.LongitudeDistance(o.Longitude, (double)longitude)
                 )
                 .ToList();
         }
         return Json(JsonConvert.SerializeObject(vm));
+    }
+    public async Task<IActionResult> GetGraph(int stationId, int fuelId, GraphDuration duration) {
+        List<StationFuelChange> stationChanges = await db.StationFuelChanges
+            .Where(o => o.StationId == stationId)
+            .Include(o=>o.Fuel)
+            .ToListAsync();
+        stationChanges = stationChanges
+            .OrderByDescending(o => DateTime.FromBinary(BitConverter.ToInt64(o.ChangeTime)))
+            .ToList();
+		
+        StationFuelGraph graph = new();
+        foreach (StationFuelChange change in stationChanges) {
+            int index = 0;
+            if (!graph.fuels.Contains(change.Fuel.FuelName)) {
+                graph.fuels.Add(change.Fuel.FuelName);
+                graph.prices.Add([]);
+            }
+            index = graph.fuels.IndexOf(change.Fuel.FuelName);
+            graph.prices[index].Add(new() {
+                changeTime = DateTime.FromBinary(
+                    BitConverter.ToInt64(change.ChangeTime)
+                ).ToJavascriptTimestamp(),
+                fuelPrice = change.Price
+            });
+        }
+        return Json(JsonConvert.SerializeObject(graph));
     }
     
     [AllowAnonymous]
