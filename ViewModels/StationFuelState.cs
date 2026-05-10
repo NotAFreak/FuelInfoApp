@@ -16,7 +16,7 @@ public enum GraphDuration : byte {
 	Year = 2
 }
 public class StationFuelState {
-	public long changeTime;
+	public string changeTime = "yyyy-mm-dd-hh";
 	public int fuelPrice;
 	
 	

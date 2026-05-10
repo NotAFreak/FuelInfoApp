@@ -65,13 +65,11 @@
                 <h4 id="txt_StationView_Name" class="card-header text-center">STATION NAME</h4>
                 <div class="card-body">
                     <h5 id="txt_StationView_BrandName" class="card-title">BRAND NAME</h5>
-                    <hr/>
-                    <h6>Fuel Availability</h6>
                 </div>
                 <div class="card-body">
                     <hr/>
                     <h6>Fuel Prices</h6>
-                    <canvas id="fuelPriceChart"></canvas>
+                    <canvas id="fuelPriceChart" class="overflow-scroll"></canvas>
                 </div>
                 <div class="card-footer text-muted">
                     <small>
@@ -113,48 +111,41 @@
         // Create fuel price chart
         const chartCtx = document.getElementById("fuelPriceChart");
         let fuelChart = new Chart(chartCtx, {
-                type: 'line',
-                options: {
-                    responsive: true,
-                        plugins: {
-                        legend: {
-                            position: 'bottom',
-                        },
-                        title: {
-                            display: false
-                        }
+            type: 'line',
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: false
                     }
                 },
                 scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            // Luxon format string
-                            tooltipFormat: 'DD T'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
                     y: {
+                        type: 'linear',
+                        min: 0,
+                        suggestedMin: 0,
+                        suggestedMax: 2,
                         title: {
                             display: true,
                             text: 'Price {$AUD}'
                         },
                         ticks: {
                             callback: function (value, index, values) {
-                                return "$" + value.toLocaleString("en-AU", {
+                                return value.toLocaleString("en-AU", {
                                     style: "currency",
                                     currency: "AUD",
-                                    minimumFractionDigits:0,
-                                    maximumFractionDigits:2});
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
                             }
                         }
                     }
-                },
+                }
             }
-        );
+        });
         // Define functions
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -376,7 +367,7 @@
                 var dataset = [fuelData.length];
                 for(var y = 0; y < fuelData.length; y++) {
                     dataset[y] = {
-                        x: new Date(fuelData[y].changeTime),
+                        x: fuelData[y].changeTime,
                         y: fuelData[y].fuelPrice / 1000
                     };
                 }

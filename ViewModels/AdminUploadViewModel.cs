@@ -42,7 +42,7 @@ public class AdminUploadViewModel : ViewModel {
 			Brand? brand = await db.Brands.FirstOrDefaultAsync(o => o.BrandName == Site_Brand);
 			// Check if brand already exists in db. If not, add it
 			if (brand is null) {
-				brand = new Brand() {
+				brand = new() {
 					BrandName = Site_Brand
 				};
 				await db.Brands.AddAsync(brand);

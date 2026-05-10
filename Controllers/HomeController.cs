@@ -132,6 +132,8 @@ public class HomeController : Controller {
         }
         return Json(JsonConvert.SerializeObject(vm));
     }
+    [AllowAnonymous]
+    [HttpGet]
     public async Task<IActionResult> GetGraph(int stationId, int fuelId, GraphDuration duration) {
         List<StationFuelChange> stationChanges = await db.StationFuelChanges
             .Where(o => o.StationId == stationId)
@@ -149,10 +151,9 @@ public class HomeController : Controller {
                 graph.prices.Add([]);
             }
             index = graph.fuels.IndexOf(change.Fuel.FuelName);
+            DateTime time = DateTime.FromBinary(BitConverter.ToInt64(change.ChangeTime));
             graph.prices[index].Add(new() {
-                changeTime = DateTime.FromBinary(
-                    BitConverter.ToInt64(change.ChangeTime)
-                ).ToJavascriptTimestamp(),
+                changeTime = $"{time.Year}-{time.Month}-{time.Day}-{time.Hour}",
                 fuelPrice = change.Price
             });
         }
