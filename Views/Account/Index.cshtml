@@ -152,9 +152,11 @@
         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-account-modal">
             Delete Account
         </button>
-        <button type="button" class="btn btn-danger" asp-action="Logout" asp-controller="Account">
-            Log Out
-        </button>
+        <form method="post" asp-action="Logout" asp-controller="Account">
+            <button class="btn btn-danger" type="submit" asp-action="Logout" asp-controller="Account">
+                Log Out
+            </button>
+        </form>
     </div>
 </div>
 

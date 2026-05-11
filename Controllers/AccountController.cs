@@ -60,8 +60,8 @@ public class AccountController : Controller {
 		return RedirectToAction("Index", "Home");
 	}
 	[HttpPost]
+	[AllowAnonymous]
 	public async Task<IActionResult> Logout() {
-		// Verify the user is the user
 		await HttpContext.SignOutAsync();
 		return RedirectToAction("Index", "Home");
 	}
@@ -184,7 +184,7 @@ public class AccountController : Controller {
 		Claim? passwordClaim = HttpContext.User.FindFirst("password");
 		if (idClaim is null || passwordClaim is null) {
 			TempData["Error"] = "Couldn't verify cookies!";
-			return RedirectToAction("Login", "Account");
+			return RedirectToAction("Logout", "Account");
 		}
 		
 		User? user = await db.Users .FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));

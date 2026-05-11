@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc;
@@ -25,22 +26,24 @@ public class HomeController : Controller {
         HomeViewModel vm = new() {
             fuels = await db.Fuels.ToListAsync()
         };
-        Claim? idClaim = HttpContext.User.FindFirst("userid");
-		Claim? passwordClaim = HttpContext.User.FindFirst("password");
-		if (idClaim is null || passwordClaim is null) {
-			TempData["Error"] = "Couldn't verify cookies!";
-			return RedirectToAction("Login", "Account");
-		}
-		User? user = await db.Users.FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
-        if (user is null) {
-            TempData["Error"] = "Couldn't find user!";
-            return RedirectToAction("Login", "Account");
-        }
-        if (user.Password != passwordClaim.Value) {
-            user = null;
-        }
-        if (user is not null) {
-            vm.cars = user.Cars.ToList();
+        if (HttpContext.User.Identity is not null && HttpContext.User.Identity.IsAuthenticated) {
+            Claim? idClaim = HttpContext.User.FindFirst("userid");
+            Claim? passwordClaim = HttpContext.User.FindFirst("password");
+            if (idClaim is null || passwordClaim is null) {
+                TempData["Error"] = "Couldn't verify cookies!";
+                return RedirectToAction("Logout", "Account");
+            }
+            User? user = await db.Users.FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+            if (user is null) {
+                TempData["Error"] = "Couldn't find user!";
+                return RedirectToAction("Login", "Account");
+            }
+            if (user.Password != passwordClaim.Value) {
+                user = null;
+            }
+            if (user is not null) {
+                vm.cars = user.Cars.ToList();
+            }
         }
         return View(vm);
     }
@@ -101,10 +104,12 @@ public class HomeController : Controller {
         HomeSearchViewModel vm = new();
         if (stationName is null) {
             vm.stations = await db.Stations
+                .Include(o=>o.Brand)
                 .Include(o=>o.StationFuelChanges)
                 .ToListAsync();
         } else {
             vm.stations = await db.Stations
+                .Include(o=>o.Brand)
                 .Include(o=>o.StationFuelChanges)
                 .Where(o => o.Name.ToLower().Contains(stationName.ToLower()))
                 .ToListAsync();
