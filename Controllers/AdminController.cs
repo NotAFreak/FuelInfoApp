@@ -56,8 +56,7 @@ public class AdminController : Controller {
 
 		try {
 			await vm.UploadData(db, filePath);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			if (System.IO.File.Exists(filePath)) {
 				System.IO.File.Delete(filePath);
 			}

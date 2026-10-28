@@ -1,28 +1,96 @@
-﻿@model FuelInfoApp.ViewModels.MapViewModel
+﻿@model FuelInfoApp.ViewModels.HomeViewModel
 @{
     ViewData["Title"] = "Home Page";
     Layout = "_Layout_Map";
 }
+<div class="d-flex h-100" xmlns="http://www.w3.org/1999/html">
+    <!--Left Sidebar-->
+    <div class="sidebar d-flex flex-column flex-shrink-0 position-fixed p-1 h-100 above-map floating-panel-left collapsed">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="hide-on-collapse m-1">
+            <form onsubmit="SearchStations(); return false;">
+                <div class="row d-flex m-1">
+                    <button class="btn btn-primary mb-2" type="submit">Search</button>
+                    <input id="srch_StationName" class="form-control mb-2" type="search" placeholder="Station name (optional)">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <input id="srch_Latitude" class="form-control" type="number" step="any" placeholder="Latitude (optional)"/>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <input id="srch_Longitude" class="form-control" type="number" step="any" placeholder="Longitude (optional)"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        @if (User.Identity is not null && User.Identity.IsAuthenticated) {
+                            <select id="srch_CarId" class="form-select" onchange="SetSearchFuelFromCar(this.value)">
+                                <option value="-1">None</option>
+                                @foreach (Car car in Model.cars) {
+                                    <option value="@car.CarId">@(car.Name + (!string.IsNullOrEmpty(car.Registration) ? " (" + car.Registration + ")" : ""))</option>
+                                }
+                            </select>
+                        }
+                        else {
+                            <label>Sign in for cars</label>
+                        }
 
-<div id="map" class="map-view"></div>
-<div class="row above-map">
-    <div class="col-md-2 above-map">
-        Left panel
-    </div>
-    <div class="col-md-10 above-map">
-        <div class="row above-map">
-            Tpo row
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <select id="srch_FuelId" class="form-select">
+                            @foreach (Fuel f in Model.fuels) {
+                                <option value="@f.FuelId">@f.FuelName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <hr/>
+            <div id="search_Spinner" class="align-self-center spinner-border spinner-border-sm" role="status" style=" visibility: hidden"> </div>
         </div>
-        <div class="row above-map">
-            bototm row
+        <div id="top-shadow"></div>
+        <div id="stations_Container" class=" mr-1 overflow-scroll bottom-0 hide-on-collapse">
+
         </div>
     </div>
+    <!--Right sidebar - Station view-->
+    <div class="sidebar-right d-flex flex-column flex-shrink-0 position-fixed p-2 h-100 above-map floating-panel-right collapsed">
+        <button class="toggle-btn-right hide-on-collapse" onclick="disableSidebarRight()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div id="stationView_Content" class="hide-on-collapse m-3 h-100">
+            <div class="card h-100">
+                <h4 id="txt_StationView_Name" class="card-header text-center">STATION NAME</h4>
+                <div class="card-body">
+                    <h5 id="txt_StationView_BrandName" class="card-title">BRAND NAME</h5>
+                </div>
+                <div class="card-body">
+                    <hr/>
+                    <h6>Fuel Prices</h6>
+                    <canvas id="fuelPriceChart" class="overflow-scroll" style="height: 500px"></canvas>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <label id="lab_StationView_Address">ADDRESS</label>
+                        <label id="lab_StationView_Suburb">SURBURB</label>
+                        <label id="lab_StationView_State">STATE</label>
+                        <label id="lab_StationView_Postcode">POSTCODE</label>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Map-->
+    <div id="map" class="map-view main-content h-100 flex-grow-1 collapsed"></div>
+
 </div>
 @section Scripts {
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
     <script src="~/lib/leaflet/leaflet.js"></script>
     <script src="~/js/map.js"></script>
-    
+     
     <script>
         // Create map
         var map = L.map('map', {
@@ -40,11 +108,72 @@
         map.on('dragend', GetNewMapData);
         $(document).ready(GetNewMapData);
         
+        // Create fuel price chart
+        const chartCtx = document.getElementById("fuelPriceChart");
+        let fuelChart = new Chart(chartCtx, {
+            type: 'line',
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        min: 0,
+                        suggestedMin: 0,
+                        suggestedMax: 2,
+                        title: {
+                            display: true,
+                            text: 'Price {$AUD}'
+                        },
+                        ticks: {
+                            callback: function (value, index, values) {
+                                return value.toLocaleString("en-AU", {
+                                    style: "currency",
+                                    currency: "AUD",
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        fuelChart.canvas.parentNode.style.width = 380;
         // Define functions
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+        function toggleSidebarRight() {
+            const sidebarRight = document.querySelector('.sidebar-right');
+            sidebarRight.classList.toggle('collapsed');
+            document.querySelector("#map").classList.toggle("collapsed");
+        }
+        function enableSidebarRight() {
+            const sidebarRight = document.querySelector('.sidebar-right');
+            sidebarRight.classList.remove('collapsed');
+            document.querySelector("#map").classList.remove("collapsed");
+        }
+        function disableSidebarRight() {
+            const sidebarRight = document.querySelector('.sidebar-right');
+            sidebarRight.classList.add('collapsed');
+            document.querySelector("#map").classList.add("collapsed");
+        }
+        
         function GetNewMapData() {
             const topLeft = map.getBounds().getNorthWest();
             const bottomRight = map.getBounds().getSouthEast()
             const zoom = map.getZoom();
+            
             $.ajax({
                 url: "/Home/UpdateMap",
                 data: {
@@ -63,7 +192,7 @@
         var stationLayer = L.layerGroup().addTo(map);
         
         function UpdateMapPosition(data, status) {
-            var d = JSON.parse(data);
+            let d = JSON.parse(data);
             groupLayer.clearLayers();
             for(let i = 0; i < d.markers.length; i++) {
                 let m = d.markers[i];
@@ -79,19 +208,186 @@
             stationLayer.clearLayers();
             for(let i = 0; i < d.stations.length; i++) {
                 let s = d.stations[i];
-                let lat = s.Latitude;
+                let lat = s.Latitude
                 let lon = s.Longitude;
                 L.marker([lat, lon], {
                     icon: L.divIcon({
                         className: 'custom-leaflet-icon',
                         html: 
-                            '<button class="btn btn-primary marker">' +
-                                '<img width="100%" height="100%" src="/img/fuel-light.png"/>' +
+                            '<button id="btn_station_' + s.StationId + '" class="btn btn-primary marker" onclick="ViewStationFromId(' + s.StationId + ')">' +
+                                '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
                             '</button>'
                     })
                 }).addTo(stationLayer);
             }
             console.log('updated map');
+        }
+        function SetSearchFuelFromCar(carId) {
+            document.getElementById("srch_FuelId").value = carId;
+        }
+        function SearchStations() {
+            let stationName = document.getElementById("srch_StationName").value;
+            if(stationName === "") {
+                stationName = null;
+            }
+            let latitude = document.getElementById("srch_Latitude").value;
+            if(latitude === "") {
+                latitude = null;
+            }
+            let longitude = document.getElementById("srch_Longitude").value;
+            if(longitude === "") {
+                longitude = null;
+            }
+            let carSelectElement = document.getElementById("srch_CarId");
+            let carId = null;
+            if(carSelectElement != null) {
+                carId = carSelectElement.value;
+                if(carId === "") {
+                    carId = null;
+                }   
+            }
+            let fuelId = document.getElementById("srch_FuelId").value;
+            if(fuelId === "") {
+                fuelId = null;
+            }
+            document.getElementById("search_Spinner").style.visibility = "visible";
+            $.ajax({
+                url: "/Home/SearchStations",
+                data: {
+                    stationName: stationName,
+                    latitude: latitude,
+                    longitude: longitude,
+                    carId: carId,
+                    fuelId: fuelId,
+                    page: 0
+                },
+                dataType: "json",
+                success: DisplaySearchedStations
+            });
+        }
+        function DisplaySearchedStations(data, status) {
+            let d = JSON.parse(data);
+            const container = document.getElementById("stations_Container");
+            container.textContent = ''; // clear
+            document.getElementById("search_Spinner").style.visibility = "hidden";
+            if(d.stations.length == 0) {
+                let div = document.createElement('div');
+                div.innerHTML = `
+                    <small class="text-center"> No available fuel stations available!</small>
+                `;
+                container.appendChild(div);
+            } else {
+                for(let i = 0; i < d.stations.length; i++) {
+                    let s = d.stations[i];
+                    let div = document.createElement('div');
+                    div.innerHTML = `
+                    <divs class="card m-1 mb-2">
+                        <div class="card-header">
+                            <label>` + s.Name + `</label>
+                            <button class="float-end btn btn-info bi bi-chevron-right" onclick="ViewStationFromId(` + s.StationId + `)"/>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <label>Brand: </label>
+                                <label>` + s.Brand.Name + `</label>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <small>`+ s.Address + ' ' + s.Suburb + ' ' + s.State + ' ' + s.Postcode +`</small> 
+                        </div>
+                    </div>
+                `;
+                    container.appendChild(div);
+                }   
+            }
+        }
+        function ViewStationFromId(stationId) {
+            $.ajax({
+                url: "/Home/GetStation",
+                data: {
+                    stationId: stationId 
+                },
+                dataType: "json",
+                success: ViewStation
+            });
+        }
+        function ViewStation(data, status) {
+            let station = JSON.parse(data);
+            $.ajax({
+                url: "/Home/GetGraph",
+                data: {
+                    stationId: station.StationId,
+                    fuelId: document.getElementById("srch_FuelId").value,
+                    duration: 0
+                },
+                dataType: "json",
+                success: DisplayFuelChart
+            });
+            
+            let latitude = station.Latitude;
+            let longitude = station.Longitude;
+            
+            // Go to position
+            map.setView([latitude, longitude], 15);
+            
+            // create marker if it doesnt exist
+            GetNewMapData();
+            let marker = document.getElementById("btn_station_" + station.StationId);
+            if(marker === null) {
+                L.marker([latitude, longitude], {
+                    icon: L.divIcon({
+                        className: 'custom-leaflet-icon',
+                        html:
+                            '<button id="btn_station_' + station.StationId + '" class="btn btn-primary marker">' +
+                                '<img width="100%" height="100%" src="/img/fuel-light.png" alt="fuel icon"/>' +
+                            '</button>'
+                    })
+                }).addTo(stationLayer);
+                marker = document.getElementById("btn_station_" + station.StationId);
+            }
+            
+            // TODO: FOCUS MARKER
+            marker.classList.add("active");
+            
+            // Open sidepanel
+            enableSidebarRight();
+            const txt_StationView_Name = document.getElementById('txt_StationView_Name');
+            const txt_StationView_BrandName = document.getElementById('txt_StationView_BrandName');
+            const lab_StationView_Address = document.getElementById('lab_StationView_Address');
+            const lab_StationView_Postcode = document.getElementById('lab_StationView_Postcode');
+            const lab_StationView_Suburb = document.getElementById('lab_StationView_Suburb');
+            const lab_StationView_State = document.getElementById('lab_StationView_State');
+            
+            txt_StationView_Name.textContent = station.Name;
+            txt_StationView_BrandName.textContent = station.Brand.BrandName;
+            lab_StationView_Address.textContent = station.Address;
+            lab_StationView_Postcode.textContent = station.Postcode;
+            lab_StationView_Suburb.textContent = station.Suburb;
+            lab_StationView_State.textContent = station.State;
+        }
+        function DisplayFuelChart(data, status) {
+            let graphData = JSON.parse(data);
+            var datasets = [graphData.prices.length];
+            for(var x = 0; x < graphData.prices.length; x++) {
+                let fuelData = graphData.prices[x];
+                var dataset = [fuelData.length];
+                for(var y = 0; y < fuelData.length; y++) {
+                    dataset[y] = {
+                        x: fuelData[y].changeTime,
+                        y: fuelData[y].fuelPrice / 1000
+                    };
+                }
+                datasets[x] = {
+                    label: graphData.fuels[x],
+                    data: dataset
+                }
+            }
+            
+            const chartData = {
+                datasets: datasets
+            }
+            fuelChart.data = chartData;
+            fuelChart.update();
         }
     </script>
 }

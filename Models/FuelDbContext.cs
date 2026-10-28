@@ -85,13 +85,13 @@ public partial class FuelDbContext : DbContext
 
         modelBuilder.Entity<StationFuelChange>(entity =>
         {
-            entity.HasKey(e => new { e.StationId, e.FuelId });
+            entity.HasKey(e => e.ChangeId);
 
             entity.ToTable("StationFuelChange");
 
-            entity.Property(e => e.StationId).HasColumnName("StationID");
             entity.Property(e => e.FuelId).HasColumnName("FuelID");
             entity.Property(e => e.IsAvailable).HasDefaultValue(1);
+            entity.Property(e => e.StationId).HasColumnName("StationID");
 
             entity.HasOne(d => d.Fuel).WithMany(p => p.StationFuelChanges)
                 .HasForeignKey(d => d.FuelId)

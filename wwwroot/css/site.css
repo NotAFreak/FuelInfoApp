@@ -1,11 +1,17 @@
 html {
   font-size: 14px;
 }
+.top-shadow {
+  width: 100%;
+  height: 0px;
+  z-index: 2;
+  -webkit-box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
+}
 .map-view {
-  position: fixed;
   top: 0px;
-  width: 100vw;
-  height: 100vh;
+  bottom: 0px;
   z-index: 0;
 }
 .custom-leaflet-icon {
@@ -27,6 +33,14 @@ html {
 }
 .above-map {
   z-index: 1;
+}
+.floating-panel-left {
+  filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+  background-color: #ffffff;
+}
+.floating-panel-right {
+  filter: drop-shadow(-4px 4px 4px rgba(0, 0, 0, 0.3));
+  background-color: #ffffff;
 }
 .navbar {
   z-index: 1;
