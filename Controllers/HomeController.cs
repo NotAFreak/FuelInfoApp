@@ -98,9 +98,16 @@ public class HomeController : Controller {
         return Json(jt);
     }
 
+    public enum SortMode : byte {
+        DistanceAsc,
+        DistanceDesc,
+        PriceAsc,
+        PriceDesc,
+    }
+
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> SearchStations(string? stationName, double? latitude, double? longitude, int? carId, int? fuelId, int page = 0) {
+    public async Task<IActionResult> SearchStations(string? stationName, double? latitude, double? longitude, int? carId, int? fuelId, int page = 0, SortMode sort = SortMode.PriceAsc) {
         HomeSearchViewModel vm = new();
         if (stationName is null) {
             vm.stations = await db.Stations

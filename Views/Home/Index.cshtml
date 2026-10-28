@@ -60,8 +60,8 @@
         <button class="toggle-btn-right hide-on-collapse" onclick="disableSidebarRight()">
             <i class="bi bi-x-lg"></i>
         </button>
-        <div id="stationView_Content" class="hide-on-collapse m-3">
-            <div class="card">
+        <div id="stationView_Content" class="hide-on-collapse m-3 h-100">
+            <div class="card h-100">
                 <h4 id="txt_StationView_Name" class="card-header text-center">STATION NAME</h4>
                 <div class="card-body">
                     <h5 id="txt_StationView_BrandName" class="card-title">BRAND NAME</h5>
@@ -69,7 +69,7 @@
                 <div class="card-body">
                     <hr/>
                     <h6>Fuel Prices</h6>
-                    <canvas id="fuelPriceChart" class="overflow-scroll"></canvas>
+                    <canvas id="fuelPriceChart" class="overflow-scroll" style="height: 500px"></canvas>
                 </div>
                 <div class="card-footer text-muted">
                     <small>
@@ -90,7 +90,7 @@
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
     <script src="~/lib/leaflet/leaflet.js"></script>
     <script src="~/js/map.js"></script>
-    
+     
     <script>
         // Create map
         var map = L.map('map', {
@@ -113,7 +113,8 @@
         let fuelChart = new Chart(chartCtx, {
             type: 'line',
             options: {
-                responsive: true,
+                responsive: false,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -146,6 +147,7 @@
                 }
             }
         });
+        fuelChart.canvas.parentNode.style.width = 380;
         // Define functions
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -236,9 +238,13 @@
             if(longitude === "") {
                 longitude = null;
             }
-            let carId = document.getElementById("srch_CarId").value;
-            if(carId === "") {
-                carId = null;
+            let carSelectElement = document.getElementById("srch_CarId");
+            let carId = null;
+            if(carSelectElement != null) {
+                carId = carSelectElement.value;
+                if(carId === "") {
+                    carId = null;
+                }   
             }
             let fuelId = document.getElementById("srch_FuelId").value;
             if(fuelId === "") {
